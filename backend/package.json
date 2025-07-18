@@ -10,6 +10,11 @@
     "build": "cd server && npm run build",
     "install": "cd server && npm install"
   },
+  "dependencies": {
+  "express": "^4.18.2",
+  
+}
+
   "keywords": ["school", "management", "backend"],
   "author": "School Management Team",
   "license": "MIT"
