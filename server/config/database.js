@@ -3,7 +3,7 @@ import logger from '../utils/logger.js';
 
 const connectDatabase = async () => {
   try {
-    const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/school_management';
+    const mongoURI = process.env.MONGODB_URI || 'mongodb+srv://school:<Yaasiin@2026>@cluster0.wio74mt.mongodb.net/';
     
     const options = {
       // Connection options for production
