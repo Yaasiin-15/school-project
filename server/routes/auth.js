@@ -5,7 +5,7 @@ import Student from '../models/Student.js';
 import Teacher from '../models/Teacher.js';
 import authMiddleware from '../middleware/auth.js';
 import { validateUserRegistration, validateUserLogin } from '../middleware/validation.js';
-import emailService from '../services/emailService.js';
+
 import logger from '../utils/logger.js';
 
 const router = express.Router();
@@ -92,9 +92,7 @@ router.post('/register', validateUserRegistration, async (req, res) => {
     });
 
     // Send welcome email (don't wait for it to complete)
-    emailService.sendWelcomeEmail(user).catch(error => {
-      logger.error('Failed to send welcome email', error, { userId: user._id });
-    });
+  
 
     res.status(201).json({
       success: true,
