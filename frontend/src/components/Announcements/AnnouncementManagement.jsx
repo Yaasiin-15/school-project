@@ -33,7 +33,7 @@ const AnnouncementManagement = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [editAnnouncement, setEditAnnouncement] = useState(null);
 
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+  const API_URL = import.meta.env.VITE_API_URL || 'https://school-backend-1ops.onrender.com';
 
   useEffect(() => {
     fetchAnnouncements();
