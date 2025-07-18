@@ -18,7 +18,7 @@ const StudentDashboard = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [weeklySchedule, setWeeklySchedule] = useState([]);
 
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+  const API_URL = import.meta.env.VITE_API_URL || 'https://school-backend-1ops.onrender.com';
 
   useEffect(() => {
     // Fetch student dashboard data from backend
