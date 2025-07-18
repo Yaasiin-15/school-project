@@ -30,7 +30,7 @@ const AdminDashboard = () => {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteError, setDeleteError] = useState(null);
 
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+  const API_URL = import.meta.env.VITE_API_URL || 'https://school-backend-1ops.onrender.com';
 
   useEffect(() => {
     // Fetch admin dashboard data from backend
