@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Bell, BookOpen, DollarSign, XCircle } from 'lucide-react';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+const API_URL = import.meta.env.VITE_API_URL || 'https://school-backend-1ops.onrender.com';
 
 function getDaysInMonth(year, month) {
   return new Date(year, month + 1, 0).getDate();
