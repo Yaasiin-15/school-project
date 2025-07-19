@@ -61,41 +61,8 @@ const LoginForm = () => {
           </p>
         </div>
 
-        {/* Demo Credentials */}
-        <div className="bg-blue-50/80 backdrop-blur-sm rounded-xl p-4 border border-blue-200">
-          <h3 className="text-sm font-medium text-blue-800 mb-2">Demo Login Credentials</h3>
-          <div className="text-xs text-blue-700 space-y-1 mb-3">
-            <div><strong>Admin:</strong> admin@school.com / password123</div>
-            <div><strong>Teacher:</strong> john.smith@school.com / teacher123</div>
-            <div><strong>Student:</strong> emma.johnson@school.com / student123</div>
-            <div><strong>Accountant:</strong> finance@school.com / accountant123</div>
-          </div>
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              onClick={() => setFormData({ email: 'admin@school.com', password: 'password123', name: '', role: 'admin' })}
-              className="px-2 py-1 bg-blue-100 hover:bg-blue-200 text-blue-800 rounded text-xs font-medium transition-colors"
-            >
-              Admin Login
-            </button>
-            <button
-              onClick={() => setFormData({ email: 'john.smith@school.com', password: 'teacher123', name: '', role: 'teacher' })}
-              className="px-2 py-1 bg-purple-100 hover:bg-purple-200 text-purple-800 rounded text-xs font-medium transition-colors"
-            >
-              Teacher Login
-            </button>
-            <button
-              onClick={() => setFormData({ email: 'emma.johnson@school.com', password: 'student123', name: '', role: 'student' })}
-              className="px-2 py-1 bg-green-100 hover:bg-green-200 text-green-800 rounded text-xs font-medium transition-colors"
-            >
-              Student Login
-            </button>
-            <button
-              onClick={() => setFormData({ email: 'finance@school.com', password: 'accountant123', name: '', role: 'accountant' })}
-              className="px-2 py-1 bg-orange-100 hover:bg-orange-200 text-orange-800 rounded text-xs font-medium transition-colors"
-            >
-              Accountant Login
-            </button>
-          </div>
+
+        
         </div>
 
         {/* Form */}
