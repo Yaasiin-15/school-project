@@ -63,7 +63,7 @@ const LoginForm = () => {
 
 
         
-        </div>
+      
 
         {/* Form */}
         <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-xl p-8 border border-white/20">
