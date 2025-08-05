@@ -93,7 +93,9 @@ const GradeManagement = () => {
 
   const fetchStudents = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/students');
+      const response = await fetch(`${API_URL}/api/students`, {
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('token')}` }
+      });
       if (response.ok) {
         const data = await response.json();
         setStudents(data.data?.students || []);
