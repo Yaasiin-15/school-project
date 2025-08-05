@@ -68,21 +68,31 @@ const StudentDashboard = () => {
             target: 90
           })) || []);
           
-          // Mock grades trend for now
-          setGradesTrend([
-            { month: 'Jan', average: 85 },
-            { month: 'Feb', average: 88 },
-            { month: 'Mar', average: 82 },
-            { month: 'Apr', average: 90 },
-            { month: 'May', average: 87 },
-            { month: 'Jun', average: 92 }
+          // Calculate grades trend from recent grades
+          const gradesByMonth = {};
+          data.recentGrades?.forEach(grade => {
+            const month = new Date(grade.date).toLocaleDateString('en-US', { month: 'short' });
+            const percentage = (grade.score / grade.maxScore) * 100;
+            if (!gradesByMonth[month]) {
+              gradesByMonth[month] = { total: 0, count: 0 };
+            }
+            gradesByMonth[month].total += percentage;
+            gradesByMonth[month].count += 1;
+          });
+          
+          const trendData = Object.entries(gradesByMonth).map(([month, data]) => ({
+            month,
+            average: Math.round(data.total / data.count)
+          }));
+          
+          setGradesTrend(trendData.length > 0 ? trendData : [
+            { month: 'Current', average: data.stats.overallAverage || 0 }
           ]);
           
-          // Set attendance data
-          const attendanceRate = data.stats.attendance;
-          const totalDays = 100; // Mock total days
-          const presentDays = Math.round((attendanceRate / 100) * totalDays);
-          const absentDays = totalDays - presentDays;
+          // Set attendance data - calculate from actual attendance rate
+          const attendanceRate = data.stats.attendance || 0;
+          const presentDays = attendanceRate;
+          const absentDays = 100 - attendanceRate;
           
           setAttendanceData([
             { name: 'Present', value: presentDays, color: '#10B981' },
@@ -103,15 +113,27 @@ const StudentDashboard = () => {
     
     fetchStudentDashboard();
 
-    // Mock weekly schedule for now - this would come from a real API
-    setWeeklySchedule([
-      { day: 'Monday', time: '09:00 AM', subject: 'Mathematics', teacher: 'John Smith', room: 'Room 101' },
-      { day: 'Monday', time: '11:00 AM', subject: 'Physics', teacher: 'Maria Garcia', room: 'Room 203' },
-      { day: 'Tuesday', time: '09:00 AM', subject: 'Chemistry', teacher: 'David Lee', room: 'Room 105' },
-      { day: 'Tuesday', time: '11:00 AM', subject: 'English', teacher: 'Sarah Wilson', room: 'Room 201' },
-      { day: 'Wednesday', time: '09:00 AM', subject: 'Biology', teacher: 'Maria Garcia', room: 'Room 204' },
-      { day: 'Wednesday', time: '11:00 AM', subject: 'Mathematics', teacher: 'John Smith', room: 'Room 101' }
-    ]);
+    // Fetch weekly schedule from API
+    const fetchWeeklySchedule = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const res = await fetch(`${API_URL}/api/students/schedule/student/me?weekly=true`, {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+          }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setWeeklySchedule(data.data?.weeklySchedule || []);
+        }
+      } catch (error) {
+        console.error('Failed to fetch weekly schedule:', error);
+        setWeeklySchedule([]);
+      }
+    };
+    
+    fetchWeeklySchedule();
   }, [API_URL]);
 
   const StatCard = ({ title, value, icon: Icon, color, subtitle }) => (

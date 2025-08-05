@@ -9,7 +9,10 @@ import {
   MessageSquare, 
   BarChart3, 
   Settings,
-  ChevronRight
+  ChevronRight,
+  FileText,
+  MessageCircle,
+  FolderOpen
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
@@ -28,25 +31,38 @@ const Sidebar = ({ activeTab, setActiveTab, isOpen }) => {
         { id: 'teachers', label: 'Teachers', icon: GraduationCap },
         { id: 'classes', label: 'Classes', icon: BookOpen },
         { id: 'grades', label: 'Grades', icon: BarChart3 },
-        { id: 'fees', label: 'Fees', icon: DollarSign },
+        { id: 'exams', label: 'Exams', icon: FileText },
+        { id: 'finance', label: 'Finance', icon: DollarSign },
         { id: 'attendance', label: 'Attendance', icon: Calendar },
         { id: 'calendar', label: 'Calendar', icon: Calendar },
+        { id: 'chat', label: 'Messages', icon: MessageCircle },
+        { id: 'resources', label: 'Resources', icon: FolderOpen },
+        { id: 'analytics', label: 'Analytics', icon: BarChart3 },
         { id: 'users', label: 'Users', icon: Users },
+        { id: 'profile', label: 'Profile', icon: Users },
         { id: 'settings', label: 'Settings', icon: Settings }
       ],
       teacher: [
         { id: 'students', label: 'My Students', icon: Users },
         { id: 'classes', label: 'My Classes', icon: BookOpen },
         { id: 'grades', label: 'Grades', icon: BarChart3 },
+        { id: 'exams', label: 'Exams', icon: FileText },
         { id: 'attendance', label: 'Attendance', icon: Calendar },
-        { id: 'calendar', label: 'Schedule', icon: Calendar }
+        { id: 'calendar', label: 'Schedule', icon: Calendar },
+        { id: 'chat', label: 'Messages', icon: MessageCircle },
+        { id: 'resources', label: 'Resources', icon: FolderOpen },
+        { id: 'profile', label: 'Profile', icon: Users }
       ],
       student: [
         { id: 'grades', label: 'My Grades', icon: BarChart3 },
         { id: 'classes', label: 'My Classes', icon: BookOpen },
+        { id: 'exams', label: 'Exams', icon: FileText },
         { id: 'fees', label: 'Fee Status', icon: DollarSign },
         { id: 'attendance', label: 'Attendance', icon: Calendar },
-        { id: 'calendar', label: 'Schedule', icon: Calendar }
+        { id: 'calendar', label: 'Schedule', icon: Calendar },
+        { id: 'chat', label: 'Messages', icon: MessageCircle },
+        { id: 'resources', label: 'Resources', icon: FolderOpen },
+        { id: 'profile', label: 'Profile', icon: Users }
       ],
       parent: [
         { id: 'students', label: 'My Children', icon: Users },
@@ -112,17 +128,18 @@ const Sidebar = ({ activeTab, setActiveTab, isOpen }) => {
 
         {/* User Profile Section */}
         <div className="p-4 border-t border-gray-200">
-          <div className="flex items-center space-x-3 p-3 rounded-lg bg-gray-50">
-            <img
-              src={user?.avatar || 'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=150&h=150'}
-              alt="Profile"
-              className="w-10 h-10 rounded-full"
-            />
-            <div className="flex-1 min-w-0">
+          <button
+            onClick={() => setActiveTab('profile')}
+            className="w-full flex items-center space-x-3 p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
+          >
+            <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 flex items-center justify-center">
+              <Users className="w-5 h-5 text-white" />
+            </div>
+            <div className="flex-1 min-w-0 text-left">
               <p className="text-sm font-medium text-gray-900 truncate">{user?.name}</p>
               <p className="text-xs text-gray-500 capitalize">{user?.role}</p>
             </div>
-          </div>
+          </button>
         </div>
       </div>
     </div>

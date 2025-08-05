@@ -394,21 +394,47 @@ const AdminDashboard = () => {
           <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-white/20">
             <h3 className="text-xl font-semibold text-gray-900 mb-4">Quick Actions</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <button className="p-4 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors flex flex-col items-center space-y-2">
+              <button 
+                onClick={() => window.location.hash = '#students'}
+                className="p-4 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors flex flex-col items-center space-y-2"
+              >
                 <Users className="w-6 h-6 text-blue-600" />
                 <span className="text-sm font-medium text-blue-900">Add Student</span>
               </button>
-              <button className="p-4 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors flex flex-col items-center space-y-2">
+              <button 
+                onClick={() => window.location.hash = '#teachers'}
+                className="p-4 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors flex flex-col items-center space-y-2"
+              >
                 <GraduationCap className="w-6 h-6 text-purple-600" />
                 <span className="text-sm font-medium text-purple-900">Add Teacher</span>
               </button>
-              <button className="p-4 bg-green-50 hover:bg-green-100 rounded-lg transition-colors flex flex-col items-center space-y-2">
+              <button 
+                onClick={() => window.location.hash = '#classes'}
+                className="p-4 bg-green-50 hover:bg-green-100 rounded-lg transition-colors flex flex-col items-center space-y-2"
+              >
                 <BookOpen className="w-6 h-6 text-green-600" />
-                <span className="text-sm font-medium text-green-900">Create Class</span>
+                <span className="text-sm font-medium text-green-900">Add Class</span>
               </button>
-              <button className="p-4 bg-orange-50 hover:bg-orange-100 rounded-lg transition-colors flex flex-col items-center space-y-2">
+              <button 
+                onClick={() => window.location.hash = '#fees'}
+                className="p-4 bg-yellow-50 hover:bg-yellow-100 rounded-lg transition-colors flex flex-col items-center space-y-2"
+              >
+                <DollarSign className="w-6 h-6 text-yellow-600" />
+                <span className="text-sm font-medium text-yellow-900">Fee Collection</span>
+              </button>
+              <button 
+                onClick={() => window.location.hash = '#announcements'}
+                className="p-4 bg-orange-50 hover:bg-orange-100 rounded-lg transition-colors flex flex-col items-center space-y-2"
+              >
                 <Bell className="w-6 h-6 text-orange-600" />
                 <span className="text-sm font-medium text-orange-900">Send Notice</span>
+              </button>
+              <button 
+                onClick={() => setActiveTab('reports')}
+                className="p-4 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors flex flex-col items-center space-y-2"
+              >
+                <TrendingUp className="w-6 h-6 text-indigo-600" />
+                <span className="text-sm font-medium text-indigo-900">Generate Report</span>
               </button>
             </div>
           </div>

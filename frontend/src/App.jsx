@@ -15,6 +15,12 @@ import AnnouncementManagement from './components/Announcements/AnnouncementManag
 import CalendarView from './components/Calendar/CalendarView';
 import UserManagement from './components/UserManagement.jsx';
 import AttendanceManagement from './components/Attendance/AttendanceManagement';
+import ProfileSettings from './components/Profile/ProfileSettings';
+import ExamManagement from './components/Exams/ExamManagement';
+import FinanceModule from './components/Finance/FinanceModule';
+import ChatInterface from './components/Communication/ChatInterface';
+import ResourceLibrary from './components/Resources/ResourceLibrary';
+import AnalyticsReports from './components/Analytics/AnalyticsReports';
 
 const AppContent = () => {
   const { user, loading } = useAuth();
@@ -74,6 +80,18 @@ const AppContent = () => {
         return <UserManagement />;
       case 'attendance':
         return <AttendanceManagement />;
+      case 'profile':
+        return <ProfileSettings />;
+      case 'exams':
+        return <ExamManagement />;
+      case 'finance':
+        return <FinanceModule />;
+      case 'chat':
+        return <ChatInterface />;
+      case 'resources':
+        return <ResourceLibrary />;
+      case 'analytics':
+        return <AnalyticsReports />;
       case 'settings':
         return <div className="text-center py-12">
           <h2 className="text-2xl font-bold text-gray-900">Settings</h2>
