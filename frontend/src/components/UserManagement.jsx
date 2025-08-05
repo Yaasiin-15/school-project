@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Plus, Search, Edit, Trash2, Eye, Mail, User as UserIcon, Shield } from 'lucide-react';
+import { Users, Plus, Search, Edit, Trash2, Eye, Mail, User as UserIcon, Shield, Calendar } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://school-backend-1ops.onrender.com';
 
@@ -143,30 +143,67 @@ const UserManagement = () => {
         </div>
       </div>
 
-      {/* Users Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredUsers.map((user) => (
-          <div key={user._id || user.id} className="bg-white rounded-lg shadow p-4 flex flex-col gap-2 border border-gray-200">
-            <div className="flex items-center gap-2">
-              <UserIcon className="w-5 h-5 text-blue-600" />
-              <span className="font-semibold">{user.name}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Mail className="w-5 h-5 text-purple-600" />
-              <span>{user.email}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Shield className="w-5 h-5 text-green-600" />
-              <span className="capitalize">{user.role}</span>
-            </div>
-            <div className="flex gap-2 mt-2">
-              <button onClick={() => { setSelectedUser(user); setShowViewModal(true); }} className="text-blue-600 hover:underline flex items-center gap-1"><Eye className="w-4 h-4" />View</button>
-              <button onClick={() => { setEditUser(user); setShowEditModal(true); }} className="text-yellow-600 hover:underline flex items-center gap-1"><Edit className="w-4 h-4" />Edit</button>
-              <button onClick={() => { if(window.confirm('Are you sure?')) handleDeleteUser(user._id || user.id); }} className="text-red-600 hover:underline flex items-center gap-1"><Trash2 className="w-4 h-4" />Delete</button>
-            </div>
-          </div>
-        ))}
-      </div>
+             {/* Users Grid */}
+       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+         {filteredUsers.map((user) => (
+           <div key={user._id || user.id} className="bg-white rounded-lg shadow p-4 flex flex-col gap-3 border border-gray-200 hover:shadow-lg transition-shadow">
+             {/* User Avatar and Info */}
+             <div className="flex items-center gap-3">
+               <div className="relative">
+                 <img 
+                   src={user.avatar || 'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=150&h=150'} 
+                   alt={user.name}
+                   className="w-12 h-12 rounded-full object-cover border-2 border-gray-200"
+                   onError={(e) => {
+                     e.target.src = 'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=150&h=150';
+                   }}
+                 />
+                 <div className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white ${
+                   user.isActive ? 'bg-green-500' : 'bg-red-500'
+                 }`}></div>
+               </div>
+               <div className="flex-1">
+                 <h3 className="font-semibold text-gray-900">{user.name}</h3>
+                 <p className="text-sm text-gray-600">{user.email}</p>
+                 <span className={`inline-block px-2 py-1 text-xs rounded-full capitalize ${
+                   user.role === 'admin' ? 'bg-red-100 text-red-800' :
+                   user.role === 'teacher' ? 'bg-blue-100 text-blue-800' :
+                   user.role === 'student' ? 'bg-green-100 text-green-800' :
+                   user.role === 'parent' ? 'bg-purple-100 text-purple-800' :
+                   'bg-yellow-100 text-yellow-800'
+                 }`}>
+                   {user.role}
+                 </span>
+               </div>
+             </div>
+             
+             {/* Action Buttons */}
+             <div className="flex gap-2 pt-2 border-t border-gray-100">
+               <button 
+                 onClick={() => { setSelectedUser(user); setShowViewModal(true); }} 
+                 className="flex-1 text-blue-600 hover:bg-blue-50 hover:text-blue-700 px-2 py-1 rounded text-sm flex items-center justify-center gap-1 transition-colors"
+               >
+                 <Eye className="w-4 h-4" />
+                 View
+               </button>
+               <button 
+                 onClick={() => { setEditUser(user); setShowEditModal(true); }} 
+                 className="flex-1 text-yellow-600 hover:bg-yellow-50 hover:text-yellow-700 px-2 py-1 rounded text-sm flex items-center justify-center gap-1 transition-colors"
+               >
+                 <Edit className="w-4 h-4" />
+                 Edit
+               </button>
+               <button 
+                 onClick={() => { if(window.confirm('Are you sure you want to delete this user?')) handleDeleteUser(user._id || user.id); }} 
+                 className="flex-1 text-red-600 hover:bg-red-50 hover:text-red-700 px-2 py-1 rounded text-sm flex items-center justify-center gap-1 transition-colors"
+               >
+                 <Trash2 className="w-4 h-4" />
+                 Delete
+               </button>
+             </div>
+           </div>
+         ))}
+       </div>
 
       {/* Add User Modal */}
       {showAddModal && (
@@ -201,7 +238,8 @@ const AddUserModal = ({ onClose, onAdd }) => {
     name: '',
     email: '',
     password: '',
-    role: 'student'
+    role: 'student',
+    avatar: ''
   });
 
   const handleSubmit = (e) => {
@@ -217,6 +255,27 @@ const AddUserModal = ({ onClose, onAdd }) => {
     <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
       <form onSubmit={handleSubmit} className="bg-white rounded-lg p-6 w-full max-w-md space-y-4 shadow-lg">
         <h2 className="text-xl font-bold mb-2">Add User</h2>
+        
+        {/* Avatar Preview */}
+        <div className="flex flex-col items-center space-y-2">
+          <img 
+            src={formData.avatar || 'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=150&h=150'} 
+            alt="Avatar preview"
+            className="w-16 h-16 rounded-full object-cover border-2 border-gray-200"
+            onError={(e) => {
+              e.target.src = 'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=150&h=150';
+            }}
+          />
+          <input 
+            type="url" 
+            name="avatar" 
+            placeholder="Avatar URL (optional)"
+            value={formData.avatar} 
+            onChange={handleChange} 
+            className="w-full border rounded px-3 py-2 text-sm"
+          />
+        </div>
+        
         <div>
           <label className="block mb-1">Name</label>
           <input type="text" name="name" value={formData.name} onChange={handleChange} required className="w-full border rounded px-3 py-2" />
@@ -240,8 +299,8 @@ const AddUserModal = ({ onClose, onAdd }) => {
           </select>
         </div>
         <div className="flex justify-end gap-2">
-          <button type="button" onClick={onClose} className="px-4 py-2 bg-gray-200 rounded">Cancel</button>
-          <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded">Add</button>
+          <button type="button" onClick={onClose} className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 transition-colors">Cancel</button>
+          <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors">Add</button>
         </div>
       </form>
     </div>
@@ -251,12 +310,52 @@ const AddUserModal = ({ onClose, onAdd }) => {
 const ViewUserModal = ({ user, onClose }) => (
   <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
     <div className="bg-white rounded-lg p-6 w-full max-w-md space-y-4 shadow-lg">
-      <h2 className="text-xl font-bold mb-2">User Details</h2>
-      <div><strong>Name:</strong> {user.name}</div>
-      <div><strong>Email:</strong> {user.email}</div>
-      <div><strong>Role:</strong> <span className="capitalize">{user.role}</span></div>
-      <div className="flex justify-end gap-2 mt-4">
-        <button onClick={onClose} className="px-4 py-2 bg-gray-200 rounded">Close</button>
+      <div className="flex items-center gap-4 mb-4">
+        <img 
+          src={user.avatar || 'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=150&h=150'} 
+          alt={user.name}
+          className="w-16 h-16 rounded-full object-cover border-2 border-gray-200"
+          onError={(e) => {
+            e.target.src = 'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=150&h=150';
+          }}
+        />
+        <div>
+          <h2 className="text-xl font-bold">{user.name}</h2>
+          <span className={`inline-block px-2 py-1 text-xs rounded-full capitalize ${
+            user.role === 'admin' ? 'bg-red-100 text-red-800' :
+            user.role === 'teacher' ? 'bg-blue-100 text-blue-800' :
+            user.role === 'student' ? 'bg-green-100 text-green-800' :
+            user.role === 'parent' ? 'bg-purple-100 text-purple-800' :
+            'bg-yellow-100 text-yellow-800'
+          }`}>
+            {user.role}
+          </span>
+        </div>
+      </div>
+      
+      <div className="space-y-3">
+        <div className="flex items-center gap-2">
+          <Mail className="w-4 h-4 text-gray-500" />
+          <span><strong>Email:</strong> {user.email}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <Shield className="w-4 h-4 text-gray-500" />
+          <span><strong>Status:</strong> 
+            <span className={`ml-1 ${user.isActive ? 'text-green-600' : 'text-red-600'}`}>
+              {user.isActive ? 'Active' : 'Inactive'}
+            </span>
+          </span>
+        </div>
+        {user.lastLogin && (
+          <div className="flex items-center gap-2">
+            <Calendar className="w-4 h-4 text-gray-500" />
+            <span><strong>Last Login:</strong> {new Date(user.lastLogin).toLocaleDateString()}</span>
+          </div>
+        )}
+      </div>
+      
+      <div className="flex justify-end gap-2 mt-6">
+        <button onClick={onClose} className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 transition-colors">Close</button>
       </div>
     </div>
   </div>
@@ -278,6 +377,27 @@ const EditUserModal = ({ user, onClose, onEdit }) => {
     <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
       <form onSubmit={handleSubmit} className="bg-white rounded-lg p-6 w-full max-w-md space-y-4 shadow-lg">
         <h2 className="text-xl font-bold mb-2">Edit User</h2>
+        
+        {/* Avatar Preview */}
+        <div className="flex flex-col items-center space-y-2">
+          <img 
+            src={formData.avatar || 'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=150&h=150'} 
+            alt="Avatar preview"
+            className="w-16 h-16 rounded-full object-cover border-2 border-gray-200"
+            onError={(e) => {
+              e.target.src = 'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=150&h=150';
+            }}
+          />
+          <input 
+            type="url" 
+            name="avatar" 
+            placeholder="Avatar URL (optional)"
+            value={formData.avatar || ''} 
+            onChange={handleChange} 
+            className="w-full border rounded px-3 py-2 text-sm"
+          />
+        </div>
+        
         <div>
           <label className="block mb-1">Name</label>
           <input type="text" name="name" value={formData.name} onChange={handleChange} required className="w-full border rounded px-3 py-2" />
@@ -297,8 +417,8 @@ const EditUserModal = ({ user, onClose, onEdit }) => {
           </select>
         </div>
         <div className="flex justify-end gap-2">
-          <button type="button" onClick={onClose} className="px-4 py-2 bg-gray-200 rounded">Cancel</button>
-          <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded">Save</button>
+          <button type="button" onClick={onClose} className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 transition-colors">Cancel</button>
+          <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors">Save</button>
         </div>
       </form>
     </div>
