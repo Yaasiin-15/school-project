@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Users, Plus, Search, Edit, Trash2, Eye, Mail, User as UserIcon, Shield } from 'lucide-react';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+const API_URL = import.meta.env.VITE_API_URL || 'https://school-backend-1ops.onrender.com';
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);

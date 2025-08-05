@@ -2,6 +2,8 @@ import React, { useEffect, useState, useContext } from 'react';
 import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
 
+const API_URL = 'https://school-backend-1ops.onrender.com';
+
 const AttendanceManagement = () => {
   const { user, token } = useAuth();
   const [classes, setClasses] = useState([]);
@@ -15,7 +17,7 @@ const AttendanceManagement = () => {
   // Fetch teacher's classes on mount
   useEffect(() => {
     if (user?.role === 'teacher') {
-      axios.get('/api/classes/teacher/me', {
+      axios.get(`${API_URL}/api/classes/teacher/me`, {
         headers: { Authorization: `Bearer ${token}` }
       })
         .then(res => {
@@ -29,7 +31,7 @@ const AttendanceManagement = () => {
   useEffect(() => {
     if (selectedClass) {
       setLoading(true);
-      axios.get(`/api/classes/${selectedClass}`,
+      axios.get(`${API_URL}/api/classes/${selectedClass}`,
         { headers: { Authorization: `Bearer ${token}` } })
         .then(res => {
           setStudents(res.data.data.class.students || []);
@@ -59,7 +61,7 @@ const AttendanceManagement = () => {
     try {
       // Submit attendance for each student
       await Promise.all(students.map(stu =>
-        axios.post('/api/attendance', {
+        axios.post(`${API_URL}/api/attendance`, {
           studentId: stu._id,
           classId: selectedClass,
           date,
