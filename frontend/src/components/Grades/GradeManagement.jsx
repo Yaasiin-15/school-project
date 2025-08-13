@@ -102,7 +102,9 @@ const GradeManagement = () => {
       });
       if (response.ok) {
         const data = await response.json();
-        setStudents(data.data?.students || []);
+        const students = data.data?.students || [];
+        console.log('Fetched students:', students.slice(0, 2)); // Log first 2 students for debugging
+        setStudents(students);
       }
     } catch (error) {
       console.error('Error fetching students:', error);
@@ -111,6 +113,7 @@ const GradeManagement = () => {
 
   const handleAddGrade = async (gradeData) => {
     try {
+      console.log('Current user role:', user?.role);
       console.log('Sending grade data:', gradeData); // Debug log
       const response = await fetch(`${API_URL}/api/grades`, {
         method: 'POST',
@@ -563,7 +566,7 @@ const AddGradeModal = ({ onClose, onAdd, students }) => {
       alert('Max score must be a positive number');
       return;
     }
-    const selectedStudent = students.find(s => (s.id || s._id) === formData.studentId);
+    const selectedStudent = students.find(s => s._id === formData.studentId);
     if (selectedStudent) {
       formData.studentName = selectedStudent.name;
       formData.className = selectedStudent.class;
@@ -599,7 +602,7 @@ const AddGradeModal = ({ onClose, onAdd, students }) => {
               >
                 <option value="">Select Student</option>
                 {students.map(student => (
-                  <option key={student.id || student._id} value={student.id || student._id}>
+                  <option key={student._id} value={student._id}>
                     {student.name} ({student.studentId}) - {student.class}
                   </option>
                 ))}
