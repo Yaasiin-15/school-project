@@ -6,7 +6,8 @@ const ProfileImageUpload = ({
   onImageUpload, 
   onImageDelete, 
   isLoading = false,
-  size = 'large' // 'small', 'medium', 'large'
+  size = 'large', // 'small', 'medium', 'large'
+  placeholder = 'Upload your photo'
 }) => {
   const [dragOver, setDragOver] = useState(false);
   const [previewImage, setPreviewImage] = useState(currentImage);
@@ -134,13 +135,13 @@ const ProfileImageUpload = ({
       {/* Upload Instructions */}
       <div className="text-center">
         <p className="text-sm text-gray-600 mb-2">
-          {previewImage ? 'Click to change image' : 'Click to upload image'}
+          {previewImage ? 'Click to change your photo' : placeholder}
         </p>
         <p className="text-xs text-gray-500">
-          Drag & drop or click to browse
+          Drag & drop or click to browse your files
         </p>
         <p className="text-xs text-gray-400 mt-1">
-          JPEG, PNG, GIF, WebP (Max 5MB)
+          Upload your actual photo - JPEG, PNG, GIF, WebP (Max 5MB)
         </p>
       </div>
 
@@ -151,7 +152,7 @@ const ProfileImageUpload = ({
         className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
       >
         <Upload className="w-4 h-4" />
-        <span>{previewImage ? 'Change Image' : 'Upload Image'}</span>
+        <span>{previewImage ? 'Change Photo' : 'Upload Your Photo'}</span>
       </button>
 
       {/* Hidden file input */}

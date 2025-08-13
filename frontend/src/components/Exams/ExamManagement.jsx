@@ -10,11 +10,14 @@ const ExamManagement = () => {
   const [marks, setMarks] = useState({});
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('exams');
+  const [classes, setClasses] = useState([]);
+  const [applyToAllClasses, setApplyToAllClasses] = useState(true);
 
   const API_URL = import.meta.env.VITE_API_URL || 'https://school-backend-1ops.onrender.com';
 
   useEffect(() => {
     fetchExams();
+    fetchClasses();
   }, []);
 
   const fetchExams = async () => {
@@ -30,6 +33,19 @@ const ExamManagement = () => {
     }
   };
 
+  const fetchClasses = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_URL}/api/exams/classes`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await response.json();
+      setClasses(data.data || []);
+    } catch (error) {
+      console.error('Failed to fetch classes:', error);
+    }
+  };
+
   const handleCreateExam = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -37,12 +53,18 @@ const ExamManagement = () => {
     const examData = {
       title: formData.get('title'),
       subject: formData.get('subject'),
-      class: formData.get('class'),
       date: formData.get('date'),
       duration: formData.get('duration'),
       maxMarks: formData.get('maxMarks'),
-      instructions: formData.get('instructions')
+      instructions: formData.get('instructions'),
+      applyToAllClasses: applyToAllClasses,
+      examType: formData.get('examType') || 'exam'
     };
+
+    // Only include class if not applying to all classes
+    if (!applyToAllClasses) {
+      examData.class = formData.get('class');
+    }
 
     try {
       const token = localStorage.getItem('token');
@@ -55,13 +77,19 @@ const ExamManagement = () => {
         body: JSON.stringify(examData)
       });
 
+      const result = await response.json();
       if (response.ok) {
         setShowCreateModal(false);
         fetchExams();
         e.target.reset();
+        setApplyToAllClasses(true);
+        alert(result.message || 'Exam created successfully!');
+      } else {
+        alert(result.message || 'Failed to create exam');
       }
     } catch (error) {
       console.error('Failed to create exam:', error);
+      alert('Failed to create exam. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -186,15 +214,22 @@ const ExamManagement = () => {
               <div key={exam._id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-gray-900">{exam.title}</h3>
-                    <div className="flex items-center gap-4 mt-2 text-sm text-gray-600">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="text-lg font-semibold text-gray-900">{exam.title}</h3>
+                      {exam.totalStudents > 50 && (
+                        <span className="px-2 py-1 bg-purple-100 text-purple-700 text-xs font-medium rounded-full">
+                          School-wide
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-4 mt-2 text-sm text-gray-600 flex-wrap">
                       <span className="flex items-center gap-1">
                         <BookOpen className="w-4 h-4" />
                         {exam.subject}
                       </span>
                       <span className="flex items-center gap-1">
                         <Users className="w-4 h-4" />
-                        {exam.class}
+                        {exam.class || 'All Classes'}
                       </span>
                       <span className="flex items-center gap-1">
                         <Calendar className="w-4 h-4" />
@@ -205,7 +240,17 @@ const ExamManagement = () => {
                         {exam.duration} mins
                       </span>
                     </div>
-                    <p className="text-sm text-gray-500 mt-2">Max Marks: {exam.maxMarks}</p>
+                    <div className="flex items-center gap-4 mt-2 text-sm">
+                      <span className="text-gray-500">Max Marks: {exam.maxMarks}</span>
+                      <span className="text-blue-600 font-medium">
+                        {exam.totalStudents} students
+                      </span>
+                      {exam.averageScore > 0 && (
+                        <span className="text-green-600">
+                          Avg: {exam.averageScore}
+                        </span>
+                      )}
+                    </div>
                   </div>
                   <div className="flex gap-2">
                     <button
@@ -232,7 +277,7 @@ const ExamManagement = () => {
       {/* Create Exam Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
-          <div className="bg-white rounded-xl shadow-xl p-6 max-w-md w-full mx-4">
+          <div className="bg-white rounded-xl shadow-xl p-6 max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto">
             <h3 className="text-xl font-bold text-gray-900 mb-4">Create New Exam</h3>
             <form onSubmit={handleCreateExam} className="space-y-4">
               <div>
@@ -245,6 +290,7 @@ const ExamManagement = () => {
                   placeholder="Mid-term Mathematics Exam"
                 />
               </div>
+              
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Subject</label>
@@ -257,16 +303,63 @@ const ExamManagement = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Class</label>
-                  <input
-                    name="class"
-                    type="text"
-                    required
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Exam Type</label>
+                  <select
+                    name="examType"
                     className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Grade 10-A"
-                  />
+                  >
+                    <option value="exam">Regular Exam</option>
+                    <option value="quiz">Quiz</option>
+                    <option value="midterm">Mid-term</option>
+                    <option value="final">Final Exam</option>
+                    <option value="assignment">Assignment</option>
+                  </select>
                 </div>
               </div>
+
+              {/* Apply to All Classes Toggle */}
+              <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="font-medium text-gray-900">Apply to All Classes</h4>
+                    <p className="text-sm text-gray-600">Create this exam for all students in the school</p>
+                    {applyToAllClasses && (
+                      <p className="text-xs text-blue-600 mt-1">
+                        Will create exam for {classes.reduce((sum, cls) => sum + cls.studentCount, 0)} students across {classes.length} classes
+                      </p>
+                    )}
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={applyToAllClasses}
+                      onChange={(e) => setApplyToAllClasses(e.target.checked)}
+                      className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                  </label>
+                </div>
+              </div>
+
+              {/* Class Selection (only shown when not applying to all classes) */}
+              {!applyToAllClasses && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Select Class</label>
+                  <select
+                    name="class"
+                    required={!applyToAllClasses}
+                    className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="">Select a class</option>
+                    {classes.map((cls) => (
+                      <option key={cls.className} value={cls.className}>
+                        {cls.className} ({cls.studentCount} students)
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
@@ -283,21 +376,25 @@ const ExamManagement = () => {
                     name="duration"
                     type="number"
                     required
+                    min="1"
                     className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     placeholder="90"
                   />
                 </div>
               </div>
+              
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Max Marks</label>
                 <input
                   name="maxMarks"
                   type="number"
                   required
+                  min="1"
                   className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   placeholder="100"
                 />
               </div>
+              
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Instructions</label>
                 <textarea
@@ -307,10 +404,14 @@ const ExamManagement = () => {
                   placeholder="Exam instructions..."
                 />
               </div>
+              
               <div className="flex gap-3 pt-4">
                 <button
                   type="button"
-                  onClick={() => setShowCreateModal(false)}
+                  onClick={() => {
+                    setShowCreateModal(false);
+                    setApplyToAllClasses(true);
+                  }}
                   className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors"
                 >
                   Cancel
@@ -320,7 +421,7 @@ const ExamManagement = () => {
                   disabled={loading}
                   className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50"
                 >
-                  {loading ? 'Creating...' : 'Create Exam'}
+                  {loading ? 'Creating...' : applyToAllClasses ? 'Create School-wide Exam' : 'Create Exam'}
                 </button>
               </div>
             </form>
@@ -335,11 +436,11 @@ const ExamManagement = () => {
             <h3 className="text-xl font-bold text-gray-900 mb-4">Enter Marks</h3>
             <div className="space-y-3">
               {students.map((student) => (
-                <div key={student._id} className="flex items-center justify-between p-3 border rounded-lg">
+                <div key={student._id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 transition-colors">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                      <span className="text-blue-600 font-medium">
-                        {student.name?.charAt(0) || 'S'}
+                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                      <span className="text-white font-semibold text-sm">
+                        {student.name?.charAt(0)?.toUpperCase() || 'S'}
                       </span>
                     </div>
                     <div>
@@ -360,7 +461,7 @@ const ExamManagement = () => {
                       className="w-20 border rounded-lg px-2 py-1 text-center focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       placeholder="0"
                     />
-                    <span className="text-gray-500">/ {selectedExam?.maxMarks || 100}</span>
+                    <span className="text-gray-500 text-sm">/ {selectedExam?.maxMarks || 100}</span>
                   </div>
                 </div>
               ))}

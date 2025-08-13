@@ -217,13 +217,15 @@ const ProfileSettings = () => {
         {/* Profile Image Section */}
         <div className="lg:col-span-1">
           <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-white/20">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Profile Image</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">Your Photo</h2>
+            <p className="text-sm text-gray-600 mb-4">Upload your actual photo for identification purposes</p>
             <ProfileImageUpload
               currentImage={profileImage}
               onImageUpload={handleImageUpload}
               onImageDelete={handleImageDelete}
               isLoading={imageLoading}
               size="large"
+              placeholder="Upload your actual photo"
             />
           </div>
         </div>
