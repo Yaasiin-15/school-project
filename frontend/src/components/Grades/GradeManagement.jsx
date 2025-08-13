@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Award, 
-  Plus, 
-  Search, 
-  Filter, 
-  MoreVertical, 
-  Edit, 
-  Trash2, 
+import {
+  Award,
+  Plus,
+  Search,
+  Filter,
+  MoreVertical,
+  Edit,
+  Trash2,
   Eye,
   BookOpen,
   User,
@@ -64,8 +64,8 @@ const GradeManagement = () => {
       });
       if (response.ok) {
         const data = await response.json();
-        setGrades(data.grades);
-        setPagination(data.pagination);
+        setGrades(data.data?.grades || []);
+        setPagination(data.data?.pagination || { currentPage: 1, totalPages: 1, totalGrades: 0 });
       }
     } catch (error) {
       setGrades([]);
@@ -112,7 +112,7 @@ const GradeManagement = () => {
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('token')}` },
         body: JSON.stringify(gradeData),
       });
-      
+
       if (response.ok) {
         await fetchGrades();
         setShowAddModal(false);
@@ -267,7 +267,7 @@ const GradeManagement = () => {
               />
             </div>
           </div>
-          
+
           <select
             value={filters.studentId}
             onChange={(e) => handleFilterChange('studentId', e.target.value)}
@@ -338,9 +338,9 @@ const GradeManagement = () => {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {grades.map((grade) => (
-                <GradeRow 
-                  key={grade._id || grade.id} 
-                  grade={grade} 
+                <GradeRow
+                  key={grade._id || grade.id}
+                  grade={grade}
                   onView={() => handleViewGrade(grade)}
                   onEdit={() => { setEditGrade(grade); setShowEditModal(true); }}
                   onDelete={() => {
@@ -366,11 +366,10 @@ const GradeManagement = () => {
                   <button
                     key={page}
                     onClick={() => handlePageChange(page)}
-                    className={`px-3 py-1 rounded ${
-                      page === pagination.currentPage
+                    className={`px-3 py-1 rounded ${page === pagination.currentPage
                         ? 'bg-blue-600 text-white'
                         : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                    }`}
+                      }`}
                   >
                     {page}
                   </button>
@@ -383,7 +382,7 @@ const GradeManagement = () => {
 
       {/* Add Grade Modal */}
       {showAddModal && user?.role !== 'student' && (
-        <AddGradeModal 
+        <AddGradeModal
           onClose={() => setShowAddModal(false)}
           onAdd={handleAddGrade}
           students={students}
@@ -392,7 +391,7 @@ const GradeManagement = () => {
 
       {/* View Grade Modal */}
       {showViewModal && selectedGrade && (
-        <ViewGradeModal 
+        <ViewGradeModal
           grade={selectedGrade}
           onClose={() => setShowViewModal(false)}
         />
@@ -400,7 +399,7 @@ const GradeManagement = () => {
 
       {/* Edit Grade Modal */}
       {showEditModal && editGrade && user?.role !== 'student' && (
-        <EditGradeModal 
+        <EditGradeModal
           grade={editGrade}
           onClose={() => setShowEditModal(false)}
           onEdit={handleEditGrade}
@@ -471,7 +470,7 @@ const GradeRow = ({ grade, onView, onEdit, onDelete }) => {
           </button>
           {showMenu && (
             <div className="absolute right-0 mt-2 w-32 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-10">
-              <button 
+              <button
                 onClick={() => {
                   onView();
                   setShowMenu(false);
@@ -481,7 +480,7 @@ const GradeRow = ({ grade, onView, onEdit, onDelete }) => {
                 <Eye className="w-4 h-4 mr-2" />
                 View
               </button>
-              {user?.role !== 'student' && <button 
+              {user?.role !== 'student' && <button
                 onClick={() => {
                   onEdit();
                   setShowMenu(false);
@@ -491,7 +490,7 @@ const GradeRow = ({ grade, onView, onEdit, onDelete }) => {
                 <Edit className="w-4 h-4 mr-2" />
                 Edit
               </button>}
-              {user?.role !== 'student' && <button 
+              {user?.role !== 'student' && <button
                 onClick={() => {
                   onDelete();
                   setShowMenu(false);
@@ -572,7 +571,7 @@ const AddGradeModal = ({ onClose, onAdd, students }) => {
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <h2 className="text-2xl font-bold text-gray-900 mb-6">Add New Grade</h2>
-        
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -594,7 +593,7 @@ const AddGradeModal = ({ onClose, onAdd, students }) => {
                 ))}
               </select>
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Subject *
