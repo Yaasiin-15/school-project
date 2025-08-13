@@ -111,6 +111,7 @@ const GradeManagement = () => {
 
   const handleAddGrade = async (gradeData) => {
     try {
+      console.log('Sending grade data:', gradeData); // Debug log
       const response = await fetch(`${API_URL}/api/grades`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('token')}` },
@@ -121,10 +122,13 @@ const GradeManagement = () => {
         await fetchGrades();
         setShowAddModal(false);
       } else {
-        alert('Failed to add grade');
+        const errorData = await response.json();
+        console.error('Server error:', errorData);
+        alert(`Failed to add grade: ${errorData.message || 'Unknown error'}`);
       }
     } catch (error) {
-      alert('Error adding grade');
+      console.error('Network error:', error);
+      alert(`Error adding grade: ${error.message}`);
     }
   };
 
@@ -529,6 +533,7 @@ const AddGradeModal = ({ onClose, onAdd, students }) => {
     date: new Date().toISOString().split('T')[0],
     remarks: '',
     term: 'First Term',
+    academicYear: '2024-25',
     weightage: 10
   });
 
@@ -558,10 +563,11 @@ const AddGradeModal = ({ onClose, onAdd, students }) => {
       alert('Max score must be a positive number');
       return;
     }
-    const selectedStudent = students.find(s => s.id === formData.studentId);
+    const selectedStudent = students.find(s => (s.id || s._id) === formData.studentId);
     if (selectedStudent) {
       formData.studentName = selectedStudent.name;
       formData.className = selectedStudent.class;
+      formData.classId = selectedStudent.classId || selectedStudent.class;
     }
     onAdd(formData);
   };
@@ -593,7 +599,7 @@ const AddGradeModal = ({ onClose, onAdd, students }) => {
               >
                 <option value="">Select Student</option>
                 {students.map(student => (
-                  <option key={student.id} value={student.id}>
+                  <option key={student.id || student._id} value={student.id || student._id}>
                     {student.name} ({student.studentId}) - {student.class}
                   </option>
                 ))}
