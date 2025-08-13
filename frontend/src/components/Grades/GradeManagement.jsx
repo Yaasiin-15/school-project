@@ -114,24 +114,41 @@ const GradeManagement = () => {
   const handleAddGrade = async (gradeData) => {
     try {
       console.log('Current user role:', user?.role);
-      console.log('Sending grade data:', gradeData); // Debug log
+      console.log('Sending grade data:', gradeData);
+      
       const response = await fetch(`${API_URL}/api/grades`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('token')}` },
+        headers: { 
+          'Content-Type': 'application/json', 
+          'Authorization': `Bearer ${localStorage.getItem('token')}` 
+        },
         body: JSON.stringify(gradeData),
       });
 
       if (response.ok) {
+        const result = await response.json();
+        console.log('Grade created successfully:', result);
         await fetchGrades();
         setShowAddModal(false);
+        alert('Grade added successfully!');
       } else {
-        const errorData = await response.json();
-        console.error('Server error:', errorData);
-        alert(`Failed to add grade: ${errorData.message || 'Unknown error'}`);
+        let errorMessage = 'Unknown error';
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.message || errorData.error || 'Server error';
+        } catch (e) {
+          errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+        }
+        console.error('Server error:', errorMessage);
+        alert(`Failed to add grade: ${errorMessage}`);
       }
     } catch (error) {
       console.error('Network error:', error);
-      alert(`Error adding grade: ${error.message}`);
+      if (error.message.includes('Failed to fetch')) {
+        alert('Cannot connect to server. Please check if the backend is running.');
+      } else {
+        alert(`Error adding grade: ${error.message}`);
+      }
     }
   };
 
