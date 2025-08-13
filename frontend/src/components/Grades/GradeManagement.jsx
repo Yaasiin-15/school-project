@@ -42,13 +42,15 @@ const GradeManagement = () => {
   const [editGrade, setEditGrade] = useState(null);
 
   useEffect(() => {
+    if (!pagination?.currentPage) return; // Safety check
+
     if (user?.role === 'student') {
       fetchStudentGrades();
     } else {
       fetchGrades();
       fetchStudents();
     }
-  }, [searchTerm, filters, pagination.currentPage]);
+  }, [searchTerm, filters, pagination?.currentPage, user?.role]);
 
   const fetchGrades = async () => {
     setLoading(true);
@@ -69,6 +71,7 @@ const GradeManagement = () => {
       }
     } catch (error) {
       setGrades([]);
+      setPagination({ currentPage: 1, totalPages: 1, totalGrades: 0 });
     } finally {
       setLoading(false);
     }
@@ -86,6 +89,7 @@ const GradeManagement = () => {
       }
     } catch (error) {
       setGrades([]);
+      setPagination({ currentPage: 1, totalPages: 1, totalGrades: 0 });
     } finally {
       setLoading(false);
     }
@@ -135,7 +139,9 @@ const GradeManagement = () => {
   };
 
   const handlePageChange = (page) => {
-    setPagination(prev => ({ ...prev, currentPage: page }));
+    if (page && typeof page === 'number') {
+      setPagination(prev => ({ ...prev, currentPage: page }));
+    }
   };
 
   // Edit Grade (Update)
@@ -355,20 +361,20 @@ const GradeManagement = () => {
         </div>
 
         {/* Pagination */}
-        {pagination.totalPages > 1 && (
+        {pagination?.totalPages > 1 && (
           <div className="px-6 py-3 border-t border-gray-200">
             <div className="flex items-center justify-between">
               <div className="text-sm text-gray-500">
-                Showing {grades.length} of {pagination.totalGrades} grades
+                Showing {grades.length} of {pagination?.totalGrades || 0} grades
               </div>
               <div className="flex space-x-2">
-                {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map(page => (
+                {Array.from({ length: pagination?.totalPages || 1 }, (_, i) => i + 1).map(page => (
                   <button
                     key={page}
                     onClick={() => handlePageChange(page)}
-                    className={`px-3 py-1 rounded ${page === pagination.currentPage
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                    className={`px-3 py-1 rounded ${page === (pagination?.currentPage || 1)
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                       }`}
                   >
                     {page}
