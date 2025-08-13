@@ -30,6 +30,7 @@ const Sidebar = ({ activeTab, setActiveTab, isOpen }) => {
         { id: 'students', label: 'Students', icon: Users },
         { id: 'teachers', label: 'Teachers', icon: GraduationCap },
         { id: 'classes', label: 'Classes', icon: BookOpen },
+        { id: 'timetable', label: 'Timetable', icon: Calendar },
         { id: 'grades', label: 'Grades', icon: BarChart3 },
         { id: 'exams', label: 'Exams', icon: FileText },
         { id: 'finance', label: 'Finance', icon: DollarSign },
@@ -45,6 +46,7 @@ const Sidebar = ({ activeTab, setActiveTab, isOpen }) => {
       teacher: [
         { id: 'students', label: 'My Students', icon: Users },
         { id: 'classes', label: 'My Classes', icon: BookOpen },
+        { id: 'timetable', label: 'Timetable', icon: Calendar },
         { id: 'grades', label: 'Grades', icon: BarChart3 },
         { id: 'exams', label: 'Exams', icon: FileText },
         { id: 'attendance', label: 'Attendance', icon: Calendar },
@@ -56,6 +58,7 @@ const Sidebar = ({ activeTab, setActiveTab, isOpen }) => {
       student: [
         { id: 'grades', label: 'My Grades', icon: BarChart3 },
         { id: 'classes', label: 'My Classes', icon: BookOpen },
+        { id: 'timetable', label: 'Timetable', icon: Calendar },
         { id: 'exams', label: 'Exams', icon: FileText },
         { id: 'fees', label: 'Fee Status', icon: DollarSign },
         { id: 'attendance', label: 'Attendance', icon: Calendar },

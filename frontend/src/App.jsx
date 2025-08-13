@@ -21,6 +21,8 @@ import FinanceModule from './components/Finance/FinanceModule';
 import ChatInterface from './components/Communication/ChatInterface';
 import ResourceLibrary from './components/Resources/ResourceLibrary';
 import AnalyticsReports from './components/Analytics/AnalyticsReports';
+import TimetableManagement from './components/Timetable/TimetableManagement';
+import TimetableViewer from './components/Timetable/TimetableViewer';
 
 const AppContent = () => {
   const { user, loading } = useAuth();
@@ -92,6 +94,8 @@ const AppContent = () => {
         return <ResourceLibrary />;
       case 'analytics':
         return <AnalyticsReports />;
+      case 'timetable':
+        return user?.role === 'student' ? <TimetableViewer /> : <TimetableManagement />;
       case 'settings':
         return <div className="text-center py-12">
           <h2 className="text-2xl font-bold text-gray-900">Settings</h2>

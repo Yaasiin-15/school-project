@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  DollarSign, 
-  Plus, 
-  Search, 
-  Filter, 
-  MoreVertical, 
-  Edit, 
-  Trash2, 
+import {
+  DollarSign,
+  Plus,
+  Search,
+  Filter,
+  MoreVertical,
+  Edit,
+  Trash2,
   Eye,
   CreditCard,
   User,
@@ -78,7 +78,12 @@ const FeeManagement = () => {
 
   const fetchStudents = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/students`);
+      const response = await fetch(`${API_URL}/api/students`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        }
+      });
       if (response.ok) {
         const data = await response.json();
         setStudents(data.data?.students || []);
@@ -91,10 +96,27 @@ const FeeManagement = () => {
   const fetchStudentFees = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_URL}/api/students/${user.id || user._id}/fees`);
+      const response = await fetch(`${API_URL}/api/students/${user.id || user._id}/fees`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        }
+      });
       if (response.ok) {
         const data = await response.json();
         setFees(data.data?.fees || []);
+      } else {
+        // If student-specific endpoint fails, try general fees endpoint with student filter
+        const fallbackResponse = await fetch(`${API_URL}/api/fees?studentId=${user.id || user._id}`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        if (fallbackResponse.ok) {
+          const fallbackData = await fallbackResponse.json();
+          setFees(fallbackData.data?.fees || []);
+        }
       }
     } catch (error) {
       setFees([]);
@@ -110,7 +132,7 @@ const FeeManagement = () => {
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('token')}` },
         body: JSON.stringify(feeData),
       });
-      
+
       if (response.ok) {
         await fetchFees();
         setShowAddModal(false);
@@ -125,13 +147,18 @@ const FeeManagement = () => {
       const response = await fetch(`${API_URL}/api/fees/${selectedFee._id || selectedFee.id}/payment`, {
         method: 'POST',
         headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(paymentData),
       });
-      
+
       if (response.ok) {
-        await fetchFees();
+        if (user?.role === 'student') {
+          await fetchStudentFees();
+        } else {
+          await fetchFees();
+        }
         setShowPaymentModal(false);
         setSelectedFee(null);
       }
@@ -145,16 +172,37 @@ const FeeManagement = () => {
     setShowViewModal(true);
     try {
       // Fetch full fee details
-      const res = await fetch(`${API_URL}/api/fees/${fee._id || fee.id}`);
+      const res = await fetch(`${API_URL}/api/fees/${fee._id || fee.id}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        }
+      });
       const data = await res.json();
-      // Fetch payment history (if available)
-      // Fetch analytics
-      const analyticsRes = await fetch(`${API_URL}/api/fees/analytics/overview`);
-      const analyticsData = await analyticsRes.json();
+
+      // Fetch analytics (only for admin/accountant)
+      let analyticsData = null;
+      if (user?.role === 'admin' || user?.role === 'accountant') {
+        try {
+          const analyticsRes = await fetch(`${API_URL}/api/fees/analytics/overview`, {
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('token')}`,
+              'Content-Type': 'application/json'
+            }
+          });
+          if (analyticsRes.ok) {
+            const analytics = await analyticsRes.json();
+            analyticsData = analytics.success ? analytics.data : null;
+          }
+        } catch (analyticsError) {
+          console.log('Analytics not available:', analyticsError);
+        }
+      }
+
       setSelectedFee(s => ({
         ...s,
         ...data.data?.fee,
-        analytics: analyticsData.success ? analyticsData.data : null,
+        analytics: analyticsData,
         loading: false
       }));
     } catch (e) {
@@ -296,7 +344,7 @@ const FeeManagement = () => {
               />
             </div>
           </div>
-          
+
           <select
             value={filters.studentId}
             onChange={(e) => handleFilterChange('studentId', e.target.value)}
@@ -367,9 +415,9 @@ const FeeManagement = () => {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {fees.map((fee) => (
-                <FeeRow 
-                  key={fee._id || fee.id} 
-                  fee={fee} 
+                <FeeRow
+                  key={fee._id || fee.id}
+                  fee={fee}
                   onView={() => handleViewFee(fee)}
                   onPayment={() => { setSelectedFee(fee); setShowPaymentModal(true); }}
                   onEdit={() => { setEditFee(fee); setShowEditModal(true); }}
@@ -396,11 +444,10 @@ const FeeManagement = () => {
                   <button
                     key={page}
                     onClick={() => handlePageChange(page)}
-                    className={`px-3 py-1 rounded ${
-                      page === pagination.currentPage
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                    }`}
+                    className={`px-3 py-1 rounded ${page === pagination.currentPage
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                      }`}
                   >
                     {page}
                   </button>
@@ -413,7 +460,7 @@ const FeeManagement = () => {
 
       {/* Add Fee Modal */}
       {showAddModal && user?.role !== 'student' && (
-        <AddFeeModal 
+        <AddFeeModal
           onClose={() => setShowAddModal(false)}
           onAdd={handleAddFee}
           students={students}
@@ -422,7 +469,7 @@ const FeeManagement = () => {
 
       {/* View Fee Modal */}
       {showViewModal && selectedFee && (
-        <ViewFeeModal 
+        <ViewFeeModal
           fee={selectedFee}
           onClose={() => setShowViewModal(false)}
         />
@@ -430,7 +477,7 @@ const FeeManagement = () => {
 
       {/* Payment Modal */}
       {showPaymentModal && selectedFee && (
-        <PaymentModal 
+        <PaymentModal
           fee={selectedFee}
           onClose={() => setShowPaymentModal(false)}
           onPayment={handleProcessPayment}
@@ -439,7 +486,7 @@ const FeeManagement = () => {
 
       {/* Edit Fee Modal */}
       {showEditModal && editFee && user?.role !== 'student' && (
-        <EditFeeModal 
+        <EditFeeModal
           fee={editFee}
           onClose={() => setShowEditModal(false)}
           onEdit={handleEditFee}
@@ -546,7 +593,7 @@ const FeeRow = ({ fee, onView, onPayment, onEdit, onDelete }) => {
             </button>
             {showMenu && (
               <div className="absolute right-0 mt-2 w-32 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-10">
-                <button 
+                <button
                   onClick={() => {
                     onView();
                     setShowMenu(false);
@@ -556,7 +603,7 @@ const FeeRow = ({ fee, onView, onPayment, onEdit, onDelete }) => {
                   <Eye className="w-4 h-4 mr-2" />
                   View
                 </button>
-                {user?.role !== 'student' && <button 
+                {user?.role !== 'student' && <button
                   onClick={() => {
                     onEdit();
                     setShowMenu(false);
@@ -566,7 +613,7 @@ const FeeRow = ({ fee, onView, onPayment, onEdit, onDelete }) => {
                   <Edit className="w-4 h-4 mr-2" />
                   Edit
                 </button>}
-                {user?.role !== 'student' && <button 
+                {user?.role !== 'student' && <button
                   onClick={() => {
                     onDelete();
                     setShowMenu(false);
@@ -638,7 +685,7 @@ const AddFeeModal = ({ onClose, onAdd, students }) => {
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <h2 className="text-2xl font-bold text-gray-900 mb-6">Add New Fee</h2>
-        
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -660,7 +707,7 @@ const AddFeeModal = ({ onClose, onAdd, students }) => {
                 ))}
               </select>
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Fee Type *
@@ -796,43 +843,43 @@ const ViewFeeModal = ({ fee, onClose }) => {
           </button>
         </div>
         <div className="mb-4 flex gap-4 border-b pb-2">
-          <button onClick={() => setTab('overview')} className={`px-3 py-1 rounded-t ${tab==='overview' ? 'bg-blue-100 text-blue-700 font-semibold' : 'bg-gray-100 text-gray-700'}`}>Overview</button>
-          <button onClick={() => setTab('payments')} className={`px-3 py-1 rounded-t ${tab==='payments' ? 'bg-blue-100 text-blue-700 font-semibold' : 'bg-gray-100 text-gray-700'}`}>Payments</button>
-          <button onClick={() => setTab('invoice')} className={`px-3 py-1 rounded-t ${tab==='invoice' ? 'bg-blue-100 text-blue-700 font-semibold' : 'bg-gray-100 text-gray-700'}`}>Invoice</button>
-          <button onClick={() => setTab('analytics')} className={`px-3 py-1 rounded-t ${tab==='analytics' ? 'bg-blue-100 text-blue-700 font-semibold' : 'bg-gray-100 text-gray-700'}`}>Analytics</button>
-              </div>
+          <button onClick={() => setTab('overview')} className={`px-3 py-1 rounded-t ${tab === 'overview' ? 'bg-blue-100 text-blue-700 font-semibold' : 'bg-gray-100 text-gray-700'}`}>Overview</button>
+          <button onClick={() => setTab('payments')} className={`px-3 py-1 rounded-t ${tab === 'payments' ? 'bg-blue-100 text-blue-700 font-semibold' : 'bg-gray-100 text-gray-700'}`}>Payments</button>
+          <button onClick={() => setTab('invoice')} className={`px-3 py-1 rounded-t ${tab === 'invoice' ? 'bg-blue-100 text-blue-700 font-semibold' : 'bg-gray-100 text-gray-700'}`}>Invoice</button>
+          <button onClick={() => setTab('analytics')} className={`px-3 py-1 rounded-t ${tab === 'analytics' ? 'bg-blue-100 text-blue-700 font-semibold' : 'bg-gray-100 text-gray-700'}`}>Analytics</button>
+        </div>
         {fee.loading ? (
           <div className="text-blue-600">Loading...</div>
         ) : (
           <>
             {tab === 'overview' && (
-          <div>
+              <div>
                 <div className="mb-4 flex gap-4 flex-wrap">
                   <div className="bg-blue-50 rounded-lg p-4 text-center min-w-[120px]">
                     <div className="text-xl font-bold text-blue-600">{fee.amount}</div>
                     <div className="text-xs text-gray-600">Amount</div>
-              </div>
+                  </div>
                   <div className="bg-green-50 rounded-lg p-4 text-center min-w-[120px]">
                     <div className="text-xl font-bold text-green-600">{fee.paidAmount || 0}</div>
                     <div className="text-xs text-gray-600">Paid</div>
-              </div>
+                  </div>
                   <div className="bg-red-50 rounded-lg p-4 text-center min-w-[120px]">
                     <div className="text-xl font-bold text-red-600">{fee.amount - (fee.paidAmount || 0)}</div>
                     <div className="text-xs text-gray-600">Pending</div>
-            </div>
+                  </div>
                   <div className="bg-yellow-50 rounded-lg p-4 text-center min-w-[120px]">
                     <div className="text-xl font-bold text-yellow-600">{fee.status}</div>
                     <div className="text-xs text-gray-600">Status</div>
-          </div>
-              </div>
+                  </div>
+                </div>
                 <div className="mb-4">
                   <h5 className="font-semibold mb-2">Fee Type</h5>
                   <div className="text-gray-700">{fee.type}</div>
-              </div>
+                </div>
                 <div className="mb-4">
                   <h5 className="font-semibold mb-2">Due Date</h5>
                   <div className="text-gray-700">{fee.dueDate ? new Date(fee.dueDate).toLocaleDateString() : '-'}</div>
-              </div>
+                </div>
               </div>
             )}
             {tab === 'payments' && (
@@ -859,11 +906,11 @@ const ViewFeeModal = ({ fee, onClose }) => {
                       )) : <tr><td colSpan={4} className="text-gray-500 py-4">No payments found.</td></tr>}
                     </tbody>
                   </table>
-              </div>
+                </div>
               </div>
             )}
             {tab === 'invoice' && (
-          <div>
+              <div>
                 <h4 className="text-lg font-semibold text-gray-900 mb-3">Invoice Details</h4>
                 <div className="mb-4">
                   <div className="text-gray-700">Invoice #: {fee.invoiceNumber || '-'}</div>
@@ -875,9 +922,9 @@ const ViewFeeModal = ({ fee, onClose }) => {
                   <div className="text-gray-700">Due: {fee.dueDate ? new Date(fee.dueDate).toLocaleDateString() : '-'}</div>
                   <div className="text-gray-700">Paid: {fee.paidAmount || 0}</div>
                   <div className="text-gray-700">Paid Date: {fee.paidDate ? new Date(fee.paidDate).toLocaleDateString() : '-'}</div>
-              </div>
                 </div>
-              )}
+              </div>
+            )}
             {tab === 'analytics' && (
               <div>
                 <h4 className="text-lg font-semibold text-gray-900 mb-3">Analytics</h4>
@@ -887,20 +934,20 @@ const ViewFeeModal = ({ fee, onClose }) => {
                       <div className="bg-blue-50 rounded-lg p-4 text-center min-w-[120px]">
                         <div className="text-xl font-bold text-blue-600">{analytics.totalFees}</div>
                         <div className="text-xs text-gray-600">Total Fees</div>
-                </div>
+                      </div>
                       <div className="bg-green-50 rounded-lg p-4 text-center min-w-[120px]">
                         <div className="text-xl font-bold text-green-600">{analytics.totalPaid}</div>
                         <div className="text-xs text-gray-600">Total Paid</div>
-              </div>
+                      </div>
                       <div className="bg-red-50 rounded-lg p-4 text-center min-w-[120px]">
                         <div className="text-xl font-bold text-red-600">{analytics.totalPending}</div>
                         <div className="text-xs text-gray-600">Total Pending</div>
-              </div>
+                      </div>
                       <div className="bg-yellow-50 rounded-lg p-4 text-center min-w-[120px]">
                         <div className="text-xl font-bold text-yellow-600">{analytics.collectionRate ? analytics.collectionRate.toFixed(1) : 0}%</div>
                         <div className="text-xs text-gray-600">Collection Rate</div>
-                </div>
-            </div>
+                      </div>
+                    </div>
                     <div className="mb-4">
                       <h5 className="font-semibold mb-2">Status Distribution</h5>
                       <div className="flex gap-2 flex-wrap">
@@ -909,17 +956,17 @@ const ViewFeeModal = ({ fee, onClose }) => {
                             <div key={status} className="bg-gray-100 rounded-lg p-3 min-w-[100px] text-center">
                               <div className="text-lg font-bold text-blue-700">{status}</div>
                               <div className="text-md text-gray-800">{count}</div>
-          </div>
+                            </div>
                           ))
                         ) : <div className="text-gray-500">No status data.</div>}
-                </div>
-                </div>
+                      </div>
+                    </div>
                   </>
                 ) : <div className="text-gray-500">No analytics data found.</div>}
-            </div>
-          )}
+              </div>
+            )}
           </>
-          )}
+        )}
       </div>
     </div>
   );
@@ -951,7 +998,7 @@ const PaymentModal = ({ fee, onClose, onPayment }) => {
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-xl p-6 w-full max-w-md">
         <h2 className="text-2xl font-bold text-gray-900 mb-6">Process Payment</h2>
-        
+
         <div className="mb-6 bg-gray-50 rounded-lg p-4">
           <div className="text-sm text-gray-600">Remaining Amount:</div>
           <div className="text-2xl font-bold text-gray-900">

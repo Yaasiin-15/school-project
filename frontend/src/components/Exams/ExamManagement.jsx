@@ -95,14 +95,15 @@ const ExamManagement = () => {
     }
   };
 
-  const handleMarksEntry = async (examId) => {
-    setSelectedExam(examId);
+  const handleMarksEntry = async (exam) => {
+    setSelectedExam(exam);
     setShowMarksModal(true);
     
-    // Fetch students for this exam
+    // Fetch students for this exam using the new URL structure
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`${API_URL}/api/exams/${examId}/students`, {
+      const url = `${API_URL}/api/exams/${encodeURIComponent(exam.subject)}/${encodeURIComponent(exam.class)}/${encodeURIComponent(exam.examType)}/students`;
+      const response = await fetch(url, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await response.json();
@@ -123,7 +124,8 @@ const ExamManagement = () => {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`${API_URL}/api/exams/${selectedExam}/marks`, {
+      const url = `${API_URL}/api/exams/${encodeURIComponent(selectedExam.subject)}/${encodeURIComponent(selectedExam.class)}/${encodeURIComponent(selectedExam.examType)}/marks`;
+      const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -143,21 +145,22 @@ const ExamManagement = () => {
     }
   };
 
-  const generateReportCard = async (examId) => {
+  const generateReportCard = async (exam) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`${API_URL}/api/exams/${examId}/report-cards`, {
+      const url = `${API_URL}/api/exams/${encodeURIComponent(exam.subject)}/${encodeURIComponent(exam.class)}/${encodeURIComponent(exam.examType)}/report-cards`;
+      const response = await fetch(url, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` }
       });
       
       if (response.ok) {
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `report-cards-${examId}.pdf`;
-        a.click();
+        const data = await response.json();
+        if (data.success) {
+          alert(data.message);
+          // In a real implementation, you would download the PDF here
+          console.log('Report data:', data.data);
+        }
       }
     } catch (error) {
       console.error('Failed to generate report cards:', error);
@@ -254,13 +257,13 @@ const ExamManagement = () => {
                   </div>
                   <div className="flex gap-2">
                     <button
-                      onClick={() => handleMarksEntry(exam._id)}
+                      onClick={() => handleMarksEntry(exam)}
                       className="px-3 py-1 bg-green-100 text-green-700 rounded-lg text-sm font-medium hover:bg-green-200 transition-colors"
                     >
                       Enter Marks
                     </button>
                     <button
-                      onClick={() => generateReportCard(exam._id)}
+                      onClick={() => generateReportCard(exam)}
                       className="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-sm font-medium hover:bg-blue-200 transition-colors flex items-center gap-1"
                     >
                       <Download className="w-4 h-4" />
