@@ -525,7 +525,6 @@ const AddGradeModal = ({ onClose, onAdd, students }) => {
   const [formData, setFormData] = useState({
     studentId: '',
     studentName: '',
-    classId: '',
     className: '',
     subjectName: '',
     examType: '',
@@ -570,12 +569,8 @@ const AddGradeModal = ({ onClose, onAdd, students }) => {
     if (selectedStudent) {
       formData.studentName = selectedStudent.name;
       formData.className = selectedStudent.class;
-      // Only set classId if it's a valid ObjectId, otherwise leave it undefined
-      if (selectedStudent.classId && selectedStudent.classId.match(/^[0-9a-fA-F]{24}$/)) {
-        formData.classId = selectedStudent.classId;
-      } else {
-        delete formData.classId; // Remove classId if it's not a valid ObjectId
-      }
+      // Remove classId to avoid validation issues
+      delete formData.classId;
     }
     onAdd(formData);
   };
