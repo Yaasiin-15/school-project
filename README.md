@@ -2,6 +2,20 @@
 
 A comprehensive web-based school management system built with React.js frontend and Node.js backend. This system provides complete functionality for managing students, teachers, classes, grades, fees, attendance, and announcements.
 
+## 🔥 Latest Updates (Authentication Fixed!)
+
+**✅ Authentication Issues Resolved** - All login and registration problems have been fixed!
+
+- Fixed password validation (now requires only 6+ characters)
+- Enhanced CORS configuration for better compatibility
+- Added comprehensive debugging tools
+- Created testing interfaces for easy verification
+
+**🧪 New Testing Tools:**
+- `test-frontend-auth.html` - User-friendly authentication testing
+- `test-auth-debug.html` - Comprehensive backend testing
+- `AUTH_TROUBLESHOOTING_GUIDE.md` - Complete troubleshooting guide
+
 ## 🚀 Features
 
 ### Core Modules
@@ -182,21 +196,33 @@ curl -X POST http://localhost:3001/api/auth/create-initial-admin \
 After seeding, you can use these default credentials:
 
 **Admin:**
-
 - Email: admin@school.com
 - Password: admin123
 
 **Teacher:**
-
 - Email: teacher@school.com
 - Password: teacher123
 
 **Student:**
-
 - Email: student@school.com
 - Password: student123
 
 > ⚠️ **Important:** Change these default passwords immediately in production!
+
+## 🧪 Testing Authentication
+
+### Quick Test (Recommended)
+1. Open `test-frontend-auth.html` in your browser
+2. Try the "Quick Login" with admin credentials
+3. Test registration with simple passwords (6+ characters)
+
+### Comprehensive Testing
+1. Open `test-auth-debug.html` for detailed backend testing
+2. Use the "Create Initial Admin" if no admin exists
+3. Test all authentication endpoints
+
+### Troubleshooting
+If you encounter authentication issues, check `AUTH_TROUBLESHOOTING_GUIDE.md` for detailed solutions.
 
 ## 📁 Project Structure
 
@@ -248,6 +274,14 @@ npm run backend:build    # Build backend for production
 npm run seed             # Seed database with initial data
 npm run clean            # Clean all node_modules and build files
 npm run lint             # Run linting on both frontend and backend
+```
+
+### Testing & Debugging Scripts
+
+```bash
+node fix-auth-issues.js  # Run automated authentication diagnostics
+# Open test-frontend-auth.html in browser for user-friendly testing
+# Open test-auth-debug.html in browser for comprehensive backend testing
 ```
 
 ### Frontend Scripts
@@ -339,11 +373,12 @@ npm run seed             # Seed database with sample data
 - **JWT Authentication** - Secure token-based authentication
 - **Role-Based Access Control** - Different permissions for different user roles
 - **Password Hashing** - Bcrypt for secure password storage
-- **Input Validation** - Express-validator for request validation
+- **Input Validation** - Express-validator for request validation (recently updated for better UX)
 - **Rate Limiting** - Protection against brute force attacks
-- **CORS Configuration** - Cross-origin resource sharing setup
+- **CORS Configuration** - Enhanced cross-origin resource sharing setup
 - **Helmet Security** - Security headers and protection
 - **Environment Variables** - Sensitive data protection
+- **Debug Logging** - Authentication attempt tracking for troubleshooting
 
 ## 🎨 User Interface
 
@@ -476,6 +511,7 @@ npm run docker:down
 
 ## 🧪 Testing
 
+### Automated Tests
 ```bash
 # Run frontend tests
 cd frontend && npm test
@@ -486,6 +522,23 @@ cd backend/server && npm test
 # Run all tests
 npm run test
 ```
+
+### Authentication Testing
+```bash
+# Run authentication diagnostics
+node fix-auth-issues.js
+
+# Manual testing with browser tools
+# 1. Open test-frontend-auth.html - User-friendly interface
+# 2. Open test-auth-debug.html - Comprehensive backend testing
+```
+
+### Common Test Scenarios
+- ✅ Admin user creation and login
+- ✅ Student/Teacher registration with simple passwords
+- ✅ JWT token generation and validation
+- ✅ CORS functionality across different origins
+- ✅ Password validation (6+ characters required)
 
 ## 📝 Contributing
 
@@ -503,7 +556,20 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🤝 Support
 
-For support, email support@yourschool.com or create an issue in the GitHub repository.
+### Authentication Issues
+If you're experiencing login or registration problems:
+1. Check `AUTH_TROUBLESHOOTING_GUIDE.md` for detailed solutions
+2. Use the testing tools: `test-frontend-auth.html` and `test-auth-debug.html`
+3. Run the diagnostic script: `node fix-auth-issues.js`
+
+### General Support
+For other support needs, email support@yourschool.com or create an issue in the GitHub repository.
+
+### Known Issues Fixed
+- ✅ 401 Unauthorized errors during login
+- ✅ 400 Bad Request errors during registration
+- ✅ CORS issues with frontend-backend communication
+- ✅ Overly strict password validation
 
 ## 📞 Contact
 

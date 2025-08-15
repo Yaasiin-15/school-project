@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Calendar, 
-  Clock, 
-  Plus, 
-  Edit, 
-  Trash2, 
-  Save, 
-  X, 
-  BookOpen, 
-  User, 
+import {
+  Calendar,
+  Clock,
+  Plus,
+  Edit,
+  Trash2,
+  Save,
+  X,
+  BookOpen,
+  User,
   MapPin,
   Filter,
   Download,
@@ -48,6 +48,85 @@ const TimetableManagement = () => {
     fetchTeachers();
   }, []);
 
+  const fetchClasses = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`${API_URL}/api/timetable/classes`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setClasses(data.data.classes || []);
+      } else {
+        setError('Failed to fetch classes');
+      }
+    } catch (error) {
+      console.error('Error fetching classes:', error);
+      setError('Failed to fetch classes');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchTeachers = async () => {
+    try {
+      const response = await fetch(`${API_URL}/api/timetable/teachers`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setTeachers(data.data.teachers || []);
+      } else {
+        setError('Failed to fetch teachers');
+      }
+    } catch (error) {
+      console.error('Error fetching teachers:', error);
+      setError('Failed to fetch teachers');
+    }
+  };
+
+  const fetchTimetable = async (classId) => {
+    try {
+      setLoading(true);
+      const response = await fetch(`${API_URL}/api/timetable/${classId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setTimetable(data.data.timetable || {});
+        setMessage('Timetable loaded successfully');
+      } else {
+        setError('Failed to fetch timetable');
+      }
+    } catch (error) {
+      console.error('Error fetching timetable:', error);
+      setError('Failed to fetch timetable');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleClassChange = (classId) => {
+    setSelectedClass(classId);
+    if (classId) {
+      fetchTimetable(classId);
+    } else {
+      setTimetable({});
+    }
+  };
+
   useEffect(() => {
     if (selectedClass) {
       fetchClassTimetable();
@@ -57,12 +136,12 @@ const TimetableManagement = () => {
   const fetchClasses = async () => {
     try {
       const response = await fetch(`${API_URL}/api/classes`, {
-        headers: { 
+        headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         setClasses(data.data?.classes || []);
@@ -75,12 +154,12 @@ const TimetableManagement = () => {
   const fetchTeachers = async () => {
     try {
       const response = await fetch(`${API_URL}/api/teachers`, {
-        headers: { 
+        headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         setTeachers(data.data?.teachers || []);
@@ -94,12 +173,12 @@ const TimetableManagement = () => {
     setLoading(true);
     try {
       const response = await fetch(`${API_URL}/api/classes/${selectedClass}/timetable`, {
-        headers: { 
+        headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         setTimetable(data.data?.timetable || {});
@@ -122,7 +201,7 @@ const TimetableManagement = () => {
     try {
       const response = await fetch(`${API_URL}/api/classes/${selectedClass}/timetable`, {
         method: 'PUT',
-        headers: { 
+        headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
@@ -132,7 +211,7 @@ const TimetableManagement = () => {
           ...periodData
         })
       });
-      
+
       if (response.ok) {
         setTimetable(prev => ({
           ...prev,
@@ -155,16 +234,16 @@ const TimetableManagement = () => {
 
   const deletePeriod = async (day, period) => {
     if (!window.confirm('Are you sure you want to delete this period?')) return;
-    
+
     try {
       const response = await fetch(`${API_URL}/api/classes/${selectedClass}/timetable/${day}/${period}`, {
         method: 'DELETE',
-        headers: { 
+        headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
-      
+
       if (response.ok) {
         setTimetable(prev => {
           const updated = { ...prev };
@@ -197,7 +276,7 @@ const TimetableManagement = () => {
 
   const generateCSV = () => {
     let csv = 'Time,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday\n';
-    
+
     timeSlots.forEach(slot => {
       if (slot.isBreak) {
         csv += `${slot.start}-${slot.end},${slot.period},${slot.period},${slot.period},${slot.period},${slot.period},${slot.period}\n`;
@@ -215,7 +294,7 @@ const TimetableManagement = () => {
         csv += row.join(',') + '\n';
       }
     });
-    
+
     return csv;
   };
 
@@ -238,7 +317,7 @@ const TimetableManagement = () => {
             <h2 className="text-3xl font-bold text-gray-800 mb-2">Timetable Management</h2>
             <p className="text-gray-600">Manage class schedules and periods</p>
           </div>
-          
+
           <div className="flex flex-wrap gap-2 mt-4 sm:mt-0">
             <button
               onClick={() => setViewMode('weekly')}
@@ -270,7 +349,7 @@ const TimetableManagement = () => {
             {error}
           </div>
         )}
-        
+
         {message && (
           <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
             {message}
@@ -420,7 +499,7 @@ const PeriodCell = ({ day, period, periodData, teachers, onEdit, onDelete }) => 
           {periodData.room}
         </div>
       )}
-      
+
       <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
         <button
           onClick={onEdit}
@@ -573,6 +652,230 @@ const EditPeriodModal = ({ period, teachers, classes, selectedClass, onSave, onC
       </div>
     </div>
   );
+};
+
+export default TimetableManagement; const re
+nderTimetableGrid = () => {
+  if (!selectedClass || Object.keys(timetable).length === 0) {
+    return (
+      <div className="text-center py-12">
+        <Calendar className="mx-auto h-12 w-12 text-gray-400" />
+        <h3 className="mt-2 text-sm font-medium text-gray-900">No timetable selected</h3>
+        <p className="mt-1 text-sm text-gray-500">Select a class to view its timetable</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="overflow-x-auto">
+      <table className="min-w-full divide-y divide-gray-200">
+        <thead className="bg-gray-50">
+          <tr>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Time
+            </th>
+            {days.map(day => (
+              <th key={day} className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                {day}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody className="bg-white divide-y divide-gray-200">
+          {timeSlots.map((slot, index) => (
+            <tr key={index} className={slot.isBreak ? 'bg-yellow-50' : ''}>
+              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                <div className="flex items-center">
+                  <Clock className="h-4 w-4 mr-2 text-gray-400" />
+                  {slot.start} - {slot.end}
+                  {slot.isBreak && (
+                    <span className="ml-2 px-2 py-1 text-xs bg-yellow-200 text-yellow-800 rounded">
+                      {slot.period}
+                    </span>
+                  )}
+                </div>
+              </td>
+              {days.map(day => (
+                <td key={`${day}-${slot.period}`} className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {slot.isBreak ? (
+                    <span className="text-yellow-600 font-medium">{slot.period}</span>
+                  ) : (
+                    timetable[day] && timetable[day][slot.period] ? (
+                      <div className="bg-blue-50 p-2 rounded border-l-4 border-blue-400">
+                        <div className="font-medium text-blue-900">
+                          {timetable[day][slot.period].subject}
+                        </div>
+                        <div className="text-xs text-blue-600">
+                          {timetable[day][slot.period].teacher}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {timetable[day][slot.period].room}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="text-gray-400 text-center">-</div>
+                    )
+                  )}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+};
+
+return (
+  <div className="space-y-6">
+    {/* Header */}
+    <div className="bg-white shadow rounded-lg p-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Timetable Management</h1>
+          <p className="mt-1 text-sm text-gray-600">
+            Manage class schedules and timetables
+          </p>
+        </div>
+        <div className="flex space-x-3">
+          <button
+            onClick={() => setViewMode('weekly')}
+            className={`px-4 py-2 rounded-md text-sm font-medium ${viewMode === 'weekly'
+              ? 'bg-blue-600 text-white'
+              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+          >
+            Weekly View
+          </button>
+          <button
+            onClick={() => setViewMode('daily')}
+            className={`px-4 py-2 rounded-md text-sm font-medium ${viewMode === 'daily'
+              ? 'bg-blue-600 text-white'
+              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+          >
+            Daily View
+          </button>
+        </div>
+      </div>
+    </div>
+
+    {/* Filters */}
+    <div className="bg-white shadow rounded-lg p-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Select Class
+          </label>
+          <select
+            value={selectedClass}
+            onChange={(e) => handleClassChange(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="">Select a class</option>
+            {classes.map(cls => (
+              <option key={cls._id} value={cls._id}>
+                {cls.name} - {cls.grade} {cls.section}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Academic Year
+          </label>
+          <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="2024-25">2024-25</option>
+            <option value="2023-24">2023-24</option>
+          </select>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Term
+          </label>
+          <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="First Term">First Term</option>
+            <option value="Second Term">Second Term</option>
+            <option value="Third Term">Third Term</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    {/* Messages */}
+    {error && (
+      <div className="bg-red-50 border border-red-200 rounded-md p-4">
+        <div className="flex">
+          <div className="flex-shrink-0">
+            <X className="h-5 w-5 text-red-400" />
+          </div>
+          <div className="ml-3">
+            <p className="text-sm text-red-800">{error}</p>
+          </div>
+          <div className="ml-auto pl-3">
+            <button
+              onClick={() => setError('')}
+              className="inline-flex text-red-400 hover:text-red-600"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+
+    {message && (
+      <div className="bg-green-50 border border-green-200 rounded-md p-4">
+        <div className="flex">
+          <div className="flex-shrink-0">
+            <Calendar className="h-5 w-5 text-green-400" />
+          </div>
+          <div className="ml-3">
+            <p className="text-sm text-green-800">{message}</p>
+          </div>
+          <div className="ml-auto pl-3">
+            <button
+              onClick={() => setMessage('')}
+              className="inline-flex text-green-400 hover:text-green-600"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+
+    {/* Timetable Grid */}
+    <div className="bg-white shadow rounded-lg p-6">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-lg font-medium text-gray-900">
+          {selectedClass ? `Timetable for ${classes.find(c => c._id === selectedClass)?.name || 'Selected Class'}` : 'Class Timetable'}
+        </h2>
+        {selectedClass && (
+          <div className="flex space-x-2">
+            <button className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+              <Download className="h-4 w-4 mr-2" />
+              Export
+            </button>
+            <button className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+              <Edit className="h-4 w-4 mr-2" />
+              Edit Timetable
+            </button>
+          </div>
+        )}
+      </div>
+
+      {loading ? (
+        <div className="text-center py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-2 text-sm text-gray-500">Loading timetable...</p>
+        </div>
+      ) : (
+        renderTimetableGrid()
+      )}
+    </div>
+  </div>
+);
 };
 
 export default TimetableManagement;

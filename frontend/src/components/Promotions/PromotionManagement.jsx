@@ -15,9 +15,17 @@ const PromotionManagement = () => {
     fetchPromotions();
   }, []);
 
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+
   const fetchClasses = async () => {
     try {
-      const response = await axios.get('/api/classes');
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${API_URL}/api/classes`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
       setClasses(response.data.data.classes || []);
     } catch (error) {
       console.error('Error fetching classes:', error);
@@ -27,6 +35,7 @@ const PromotionManagement = () => {
   const fetchPromotions = async () => {
     try {
       setLoading(true);
+      const token = localStorage.getItem('token');
       const params = new URLSearchParams({
         academicYear,
         term,
@@ -34,7 +43,12 @@ const PromotionManagement = () => {
         ...(selectedClass && { grade: selectedClass })
       });
 
-      const response = await axios.get(`/api/promotions?${params}`);
+      const response = await axios.get(`${API_URL}/api/promotions?${params}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
       setPromotions(response.data.data.promotions || []);
     } catch (error) {
       console.error('Error fetching promotions:', error);
@@ -51,10 +65,16 @@ const PromotionManagement = () => {
 
     try {
       setLoading(true);
-      const response = await axios.post('/api/promotions/evaluate', {
+      const token = localStorage.getItem('token');
+      const response = await axios.post(`${API_URL}/api/promotions/evaluate`, {
         classId: selectedClass,
         academicYear,
         term
+      }, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
 
       alert(`Evaluation completed! ${response.data.data.eligible} out of ${response.data.data.totalStudents} students are eligible for promotion.`);
@@ -69,7 +89,13 @@ const PromotionManagement = () => {
 
   const promoteStudent = async (promotionId) => {
     try {
-      await axios.post(`/api/promotions/promote/${promotionId}`);
+      const token = localStorage.getItem('token');
+      await axios.post(`${API_URL}/api/promotions/promote/${promotionId}`, {}, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
       alert('Student promoted successfully!');
       fetchPromotions();
     } catch (error) {
@@ -92,10 +118,16 @@ const PromotionManagement = () => {
 
     try {
       setLoading(true);
-      const response = await axios.post('/api/promotions/bulk-promote', {
+      const token = localStorage.getItem('token');
+      const response = await axios.post(`${API_URL}/api/promotions/bulk-promote`, {
         classId: selectedClass,
         academicYear,
         studentIds: eligiblePromotions.map(p => p.studentId._id)
+      }, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
 
       alert(`Bulk promotion completed! ${response.data.data.promoted} students promoted, ${response.data.data.failed} failed.`);
