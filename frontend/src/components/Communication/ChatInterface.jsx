@@ -31,46 +31,23 @@ const ChatInterface = () => {
   const fetchUsers = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`${API_URL}/api/users/chat-users`, {
-        headers: { Authorization: `Bearer ${token}` }
+      const response = await fetch(`${API_URL}/api/messages/users/chat-users`, {
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
-      const data = await response.json();
-      setUsers(data.data || []);
+      
+      if (response.ok) {
+        const data = await response.json();
+        setUsers(data.data || []);
+      } else {
+        console.error('Failed to fetch users:', response.status);
+        setUsers([]);
+      }
     } catch (error) {
       console.error('Failed to fetch users:', error);
-      // Mock data for demo
-      setUsers([
-        {
-          _id: '1',
-          name: 'John Smith',
-          role: 'teacher',
-          avatar: null,
-          lastSeen: new Date(),
-          isOnline: true,
-          lastMessage: 'How are the students doing?',
-          unreadCount: 2
-        },
-        {
-          _id: '2',
-          name: 'Sarah Johnson',
-          role: 'parent',
-          avatar: null,
-          lastSeen: new Date(Date.now() - 300000),
-          isOnline: false,
-          lastMessage: 'Thank you for the update',
-          unreadCount: 0
-        },
-        {
-          _id: '3',
-          name: 'Mike Wilson',
-          role: 'student',
-          avatar: null,
-          lastSeen: new Date(Date.now() - 600000),
-          isOnline: true,
-          lastMessage: 'I have a question about homework',
-          unreadCount: 1
-        }
-      ]);
+      setUsers([]);
     }
   };
 

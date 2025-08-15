@@ -96,7 +96,8 @@ const FeeManagement = () => {
   const fetchStudentFees = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_URL}/api/students/${user.id || user._id}/fees`, {
+      // Try student-specific endpoint first
+      const response = await fetch(`${API_URL}/api/fees?studentId=${user.id || user._id}`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
           'Content-Type': 'application/json'
@@ -106,19 +107,11 @@ const FeeManagement = () => {
         const data = await response.json();
         setFees(data.data?.fees || []);
       } else {
-        // If student-specific endpoint fails, try general fees endpoint with student filter
-        const fallbackResponse = await fetch(`${API_URL}/api/fees?studentId=${user.id || user._id}`, {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            'Content-Type': 'application/json'
-          }
-        });
-        if (fallbackResponse.ok) {
-          const fallbackData = await fallbackResponse.json();
-          setFees(fallbackData.data?.fees || []);
-        }
+        console.error('Failed to fetch student fees:', response.status);
+        setFees([]);
       }
     } catch (error) {
+      console.error('Error fetching student fees:', error);
       setFees([]);
     } finally {
       setLoading(false);

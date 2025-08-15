@@ -27,51 +27,22 @@ const ResourceLibrary = () => {
     try {
       const token = localStorage.getItem('token');
       const response = await fetch(`${API_URL}/api/resources`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
-      const data = await response.json();
-      setResources(data.data || []);
+      
+      if (response.ok) {
+        const data = await response.json();
+        setResources(data.data || []);
+      } else {
+        console.error('Failed to fetch resources:', response.status);
+        setResources([]);
+      }
     } catch (error) {
       console.error('Failed to fetch resources:', error);
-      // Mock data for demo
-      setResources([
-        {
-          _id: '1',
-          name: 'Mathematics Textbook Chapter 5.pdf',
-          type: 'pdf',
-          size: 2048576,
-          uploadedBy: 'John Smith',
-          uploadDate: new Date(),
-          downloads: 45,
-          accessLevel: 'students',
-          subject: 'Mathematics',
-          grade: 'Grade 10'
-        },
-        {
-          _id: '2',
-          name: 'Science Lab Video - Experiment 3.mp4',
-          type: 'video',
-          size: 15728640,
-          uploadedBy: 'Sarah Johnson',
-          uploadDate: new Date(Date.now() - 86400000),
-          downloads: 23,
-          accessLevel: 'teachers',
-          subject: 'Science',
-          grade: 'Grade 9'
-        },
-        {
-          _id: '3',
-          name: 'History Timeline Presentation.pptx',
-          type: 'presentation',
-          size: 5242880,
-          uploadedBy: 'Mike Wilson',
-          uploadDate: new Date(Date.now() - 172800000),
-          downloads: 67,
-          accessLevel: 'public',
-          subject: 'History',
-          grade: 'Grade 8'
-        }
-      ]);
+      setResources([]);
     }
   };
 
