@@ -23,6 +23,9 @@ import ResourceLibrary from './components/Resources/ResourceLibrary';
 import AnalyticsReports from './components/Analytics/AnalyticsReports';
 import TimetableManagement from './components/Timetable/TimetableManagement';
 import TimetableViewer from './components/Timetable/TimetableViewer';
+import PromotionManagement from './components/Promotions/PromotionManagement';
+import FeeReminderManagement from './components/Fees/FeeReminderManagement';
+import ClassListExport from './components/Classes/ClassListExport';
 
 const AppContent = () => {
   const { user, loading } = useAuth();
@@ -96,6 +99,12 @@ const AppContent = () => {
         return <AnalyticsReports />;
       case 'timetable':
         return user?.role === 'student' ? <TimetableViewer /> : <TimetableManagement />;
+      case 'promotions':
+        return <PromotionManagement />;
+      case 'fee-reminders':
+        return <FeeReminderManagement />;
+      case 'class-export':
+        return <ClassListExport />;
       case 'settings':
         return <div className="text-center py-12">
           <h2 className="text-2xl font-bold text-gray-900">Settings</h2>
