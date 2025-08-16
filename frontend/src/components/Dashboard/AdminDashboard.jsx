@@ -457,7 +457,7 @@ const AdminDashboard = () => {
           {scheduleLoading ? (
             <div className="space-y-2 animate-pulse">
               {[...Array(6)].map((_, i) => (
-                <div key={i} className="h-8 bg-gray-100 rounded" />
+                <div key={`schedule-loading-${i}`} className="h-8 bg-gray-100 rounded" />
               ))}
             </div>
           ) : scheduleError ? (

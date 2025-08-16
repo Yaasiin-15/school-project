@@ -56,7 +56,7 @@ const TimetableManagement = () => {
   const fetchClasses = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_URL}/api/classes`, {
+      const response = await fetch(`${API_URL}/api/timetable/classes`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -79,7 +79,7 @@ const TimetableManagement = () => {
 
   const fetchTeachers = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/teachers`, {
+      const response = await fetch(`${API_URL}/api/timetable/teachers`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -101,7 +101,7 @@ const TimetableManagement = () => {
   const fetchClassTimetable = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_URL}/api/classes/${selectedClass}/timetable`, {
+      const response = await fetch(`${API_URL}/api/timetable/${selectedClass}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -137,7 +137,7 @@ const TimetableManagement = () => {
 
   const savePeriod = async (day, period, periodData) => {
     try {
-      const response = await fetch(`${API_URL}/api/classes/${selectedClass}/timetable`, {
+      const response = await fetch(`${API_URL}/api/timetable/${selectedClass}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -174,7 +174,7 @@ const TimetableManagement = () => {
     if (!window.confirm('Are you sure you want to delete this period?')) return;
 
     try {
-      const response = await fetch(`${API_URL}/api/classes/${selectedClass}/timetable/${day}/${period}`, {
+      const response = await fetch(`${API_URL}/api/timetable/${selectedClass}/${day}/${period}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,

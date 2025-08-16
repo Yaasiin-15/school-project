@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Bell, BookOpen, DollarSign, XCircle } from 'lucide-react';
-
-const API_URL = import.meta.env.VITE_API_URL || 'https://school-backend-1ops.onrender.com';
+import { useAuth } from '../../context/AuthContext';
 
 function getDaysInMonth(year, month) {
   return new Date(year, month + 1, 0).getDate();
@@ -27,6 +26,7 @@ const eventTypeMeta = {
 };
 
 const CalendarView = () => {
+  const { token, API_URL } = useAuth();
   const today = new Date();
   const [currentMonth, setCurrentMonth] = useState(today.getMonth());
   const [currentYear, setCurrentYear] = useState(today.getFullYear());
@@ -44,10 +44,15 @@ const CalendarView = () => {
     setLoading(true);
     try {
       // Fetch events from multiple endpoints (announcements, classes, exams, fees)
+      const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      };
+      
       const [annRes, classRes, feeRes] = await Promise.all([
-        fetch(`${API_URL}/api/announcements?month=${currentMonth+1}&year=${currentYear}`),
-        fetch(`${API_URL}/api/classes?month=${currentMonth+1}&year=${currentYear}`),
-        fetch(`${API_URL}/api/fees?month=${currentMonth+1}&year=${currentYear}`)
+        fetch(`${API_URL}/api/announcements?month=${currentMonth+1}&year=${currentYear}`, { headers }),
+        fetch(`${API_URL}/api/classes?month=${currentMonth+1}&year=${currentYear}`, { headers }),
+        fetch(`${API_URL}/api/fees?month=${currentMonth+1}&year=${currentYear}`, { headers })
       ]);
       const [annData, classData, feeData] = await Promise.all([
         annRes.ok ? annRes.json() : { data: { announcements: [] } },
