@@ -58,15 +58,26 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
+      console.log('Attempting login to:', `${API_URL}/api/auth/login`);
+      
       const response = await fetch(`${API_URL}/api/auth/login`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
         },
+        credentials: 'include',
         body: JSON.stringify({ email, password })
       });
 
+      console.log('Login response status:', response.status);
+      
+      if (!response.ok) {
+        throw new Error(`Network response was not ok: ${response.status}`);
+      }
+
       const data = await response.json();
+      console.log('Login response data:', data);
 
       if (data.success) {
         setToken(data.data.token);
@@ -79,7 +90,12 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (error) {
       console.error('Login error:', error);
-      return { success: false, message: 'Network error. Please try again.' };
+      return { 
+        success: false, 
+        message: error.message.includes('CORS') 
+          ? 'CORS error - please check server configuration' 
+          : 'Network error. Please try again.' 
+      };
     }
   };
 
