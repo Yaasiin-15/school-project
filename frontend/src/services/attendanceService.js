@@ -17,7 +17,7 @@ class AttendanceService {
   // Mark attendance for single student
   async markAttendance(attendanceData) {
     try {
-      const response = await axios.post(
+      const response = await axiosInstance.post(
         API_ENDPOINTS.attendance.mark,
         attendanceData
       );
@@ -30,7 +30,7 @@ class AttendanceService {
   // Bulk attendance marking
   async bulkMarkAttendance(bulkData) {
     try {
-      const response = await axios.post(
+      const response = await axiosInstance.post(
         API_ENDPOINTS.attendance.bulkMark,
         bulkData
       );
@@ -44,7 +44,7 @@ class AttendanceService {
   async getClassSummary(classId, date) {
     try {
       const params = date ? { date } : {};
-      const response = await axios.get(
+      const response = await axiosInstance.get(
         API_ENDPOINTS.attendance.classSummary(classId),
         { params }
       );
@@ -57,7 +57,7 @@ class AttendanceService {
   // Get student attendance analytics
   async getStudentAnalytics(studentId, params = {}) {
     try {
-      const response = await axios.get(
+      const response = await axiosInstance.get(
         API_ENDPOINTS.attendance.studentAnalytics(studentId),
         { params }
       );
@@ -70,9 +70,12 @@ class AttendanceService {
   // Generate attendance reports
   async generateReports(params = {}) {
     try {
-      const response = await axios.get(API_ENDPOINTS.attendance.reports, {
-        params,
-      });
+      const response = await axiosInstance.get(
+        API_ENDPOINTS.attendance.reports,
+        {
+          params,
+        }
+      );
       return response.data;
     } catch (error) {
       throw this.handleError(error);
@@ -82,9 +85,12 @@ class AttendanceService {
   // Get attendance defaulters
   async getDefaulters(params = {}) {
     try {
-      const response = await axios.get(API_ENDPOINTS.attendance.defaulters, {
-        params,
-      });
+      const response = await axiosInstance.get(
+        API_ENDPOINTS.attendance.defaulters,
+        {
+          params,
+        }
+      );
       return response.data;
     } catch (error) {
       throw this.handleError(error);
@@ -94,7 +100,7 @@ class AttendanceService {
   // Send notifications to parents
   async notifyParents(notificationData) {
     try {
-      const response = await axios.post(
+      const response = await axiosInstance.post(
         API_ENDPOINTS.attendance.notifyParents,
         notificationData
       );
@@ -107,7 +113,7 @@ class AttendanceService {
   // Update attendance record
   async updateAttendance(id, attendanceData) {
     try {
-      const response = await axios.put(
+      const response = await axiosInstance.put(
         `${API_ENDPOINTS.attendance.base}/${id}`,
         attendanceData
       );
@@ -120,7 +126,7 @@ class AttendanceService {
   // Delete attendance record
   async deleteAttendance(id) {
     try {
-      const response = await axios.delete(
+      const response = await axiosInstance.delete(
         `${API_ENDPOINTS.attendance.base}/${id}`
       );
       return response.data;
@@ -132,7 +138,7 @@ class AttendanceService {
   // Get attendance statistics for dashboard
   async getAttendanceStats(params = {}) {
     try {
-      const response = await axios.get(
+      const response = await axiosInstance.get(
         `${API_ENDPOINTS.attendance.base}/stats`,
         { params }
       );
