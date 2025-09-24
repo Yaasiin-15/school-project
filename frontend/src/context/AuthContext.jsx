@@ -66,14 +66,15 @@ export const AuthProvider = ({ children }) => {
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         },
-        credentials: 'include',
+        // Remove credentials: 'include' to avoid CORS wildcard issue
         body: JSON.stringify({ email, password })
       });
 
       console.log('Login response status:', response.status);
       
       if (!response.ok) {
-        throw new Error(`Network response was not ok: ${response.status}`);
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
       }
 
       const data = await response.json();
@@ -90,11 +91,25 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (error) {
       console.error('Login error:', error);
+      
+      // Handle specific error types
+      let errorMessage = 'Network error. Please try again.';
+      
+      if (error.message.includes('CORS')) {
+        errorMessage = 'CORS error - server configuration issue';
+      } else if (error.message.includes('Failed to fetch')) {
+        errorMessage = 'Unable to connect to server. Please check your internet connection.';
+      } else if (error.message.includes('401')) {
+        errorMessage = 'Invalid email or password';
+      } else if (error.message.includes('500')) {
+        errorMessage = 'Server error. Please try again later.';
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
       return { 
         success: false, 
-        message: error.message.includes('CORS') 
-          ? 'CORS error - please check server configuration' 
-          : 'Network error. Please try again.' 
+        message: errorMessage
       };
     }
   };
