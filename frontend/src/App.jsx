@@ -1,134 +1,75 @@
-import React, { useState } from 'react';
-import { BrowserRouter as Router } from 'react-router-dom';
-import { AuthProvider, useAuth } from './context/AuthContext';
-import LoginForm from './components/Auth/LoginForm';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
 import Layout from './components/Layout/Layout';
-import AdminDashboard from './components/Dashboard/AdminDashboard';
-import TeacherDashboard from './components/Dashboard/TeacherDashboard';
-import StudentDashboard from './components/Dashboard/StudentDashboard';
+import Login from './components/Auth/Login';
+import Register from './components/Auth/Register';
+import Dashboard from './components/Dashboard/Dashboard';
+import EnhancedDashboard from './components/Dashboard/EnhancedDashboard';
 import StudentManagement from './components/Students/StudentManagement';
 import TeacherManagement from './components/Teachers/TeacherManagement';
 import ClassManagement from './components/Classes/ClassManagement';
 import GradeManagement from './components/Grades/GradeManagement';
 import FeeManagement from './components/Fees/FeeManagement';
-import AnnouncementManagement from './components/Announcements/AnnouncementManagement';
-import CalendarView from './components/Calendar/CalendarView';
-import UserManagement from './components/UserManagement.jsx';
 import AttendanceManagement from './components/Attendance/AttendanceManagement';
-import ProfileSettings from './components/Profile/ProfileSettings';
-import ExamManagement from './components/Exams/ExamManagement';
-import FinanceModule from './components/Finance/FinanceModule';
-import ChatInterface from './components/Communication/ChatInterface';
-import ResourceLibrary from './components/Resources/ResourceLibrary';
-import AnalyticsReports from './components/Analytics/AnalyticsReports';
-import TimetableManagement from './components/Timetable/TimetableManagement';
-import TimetableViewer from './components/Timetable/TimetableViewer';
-import PromotionManagement from './components/Promotions/PromotionManagement';
-import FeeReminderManagement from './components/Fees/FeeReminderManagement';
-import ClassListExport from './components/Classes/ClassListExport';
-
-const AppContent = () => {
-  const { user, loading } = useAuth();
-  const [activeTab, setActiveTab] = useState('dashboard');
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return <LoginForm />;
-  }
-
-  const renderDashboard = () => {
-    switch (user.role) {
-      case 'admin':
-        return <AdminDashboard />;
-      case 'teacher':
-        return <TeacherDashboard />;
-      case 'student':
-        return <StudentDashboard />;
-      case 'parent':
-        return <StudentDashboard />; // Parent sees similar view to student
-      case 'accountant':
-        return <AdminDashboard />; // Accountant sees admin-like view
-      default:
-        return <AdminDashboard />;
-    }
-  };
-
-  const renderContent = () => {
-    switch (activeTab) {
-      case 'dashboard':
-        return renderDashboard();
-      case 'students':
-        return <StudentManagement />;
-      case 'teachers':
-        return <TeacherManagement />;
-      case 'classes':
-        return <ClassManagement />;
-      case 'grades':
-        return <GradeManagement />;
-      case 'fees':
-        return <FeeManagement />;
-      case 'calendar':
-        return <CalendarView />;
-      case 'announcements':
-        return <AnnouncementManagement />;
-      case 'users':
-        return <UserManagement />;
-      case 'attendance':
-        return <AttendanceManagement />;
-      case 'profile':
-        return <ProfileSettings />;
-      case 'exams':
-        return <ExamManagement />;
-      case 'finance':
-        return <FinanceModule />;
-      case 'chat':
-        return <ChatInterface />;
-      case 'resources':
-        return <ResourceLibrary />;
-      case 'analytics':
-        return <AnalyticsReports />;
-      case 'timetable':
-        return user?.role === 'student' ? <TimetableViewer /> : <TimetableManagement />;
-      case 'promotions':
-        return <PromotionManagement />;
-      case 'fee-reminders':
-        return <FeeReminderManagement />;
-      case 'class-export':
-        return <ClassListExport />;
-      case 'settings':
-        return <div className="text-center py-12">
-          <h2 className="text-2xl font-bold text-gray-900">Settings</h2>
-          <p className="text-gray-600 mt-2">Settings will be implemented here</p>
-        </div>;
-      default:
-        return renderDashboard();
-    }
-  };
-
-  return (
-    <Layout activeTab={activeTab} setActiveTab={setActiveTab}>
-      {renderContent()}
-    </Layout>
-  );
-};
+import EnhancedAttendanceManagement from './components/Attendance/EnhancedAttendanceManagement';
+import AnnouncementManagement from './components/Announcements/AnnouncementManagement';
+import ParentManagement from './components/Parents/ParentManagement';
+import SubjectManagement from './components/Subjects/SubjectManagement';
+import LibraryManagement from './components/Library/LibraryManagement';
+import TransportManagement from './components/Transport/TransportManagement';
+import ProtectedRoute from './components/Auth/ProtectedRoute';
 
 function App() {
   return (
-    <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-      <AuthProvider>
-        <AppContent />
-      </AuthProvider>
-    </Router>
+    <AuthProvider>
+      <Router>
+        <div className="App">
+          <Routes>
+            {/* Public Routes */}
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            
+            {/* Protected Routes */}
+            <Route path="/" element={
+              <ProtectedRoute>
+                <Layout />
+              </ProtectedRoute>
+            }>
+              {/* Dashboard Routes */}
+              <Route index element={<Navigate to="/dashboard" replace />} />
+              <Route path="dashboard" element={<EnhancedDashboard />} />
+              <Route path="dashboard/classic" element={<Dashboard />} />
+              
+              {/* Core Management Routes */}
+              <Route path="students" element={<StudentManagement />} />
+              <Route path="teachers" element={<TeacherManagement />} />
+              <Route path="classes" element={<ClassManagement />} />
+              <Route path="parents" element={<ParentManagement />} />
+              <Route path="subjects" element={<SubjectManagement />} />
+              
+              {/* Academic Management Routes */}
+              <Route path="grades" element={<GradeManagement />} />
+              <Route path="attendance" element={<EnhancedAttendanceManagement />} />
+              <Route path="attendance/classic" element={<AttendanceManagement />} />
+              
+              {/* Financial Management Routes */}
+              <Route path="fees" element={<FeeManagement />} />
+              
+              {/* Additional Services Routes */}
+              <Route path="library" element={<LibraryManagement />} />
+              <Route path="transport" element={<TransportManagement />} />
+              
+              {/* Communication Routes */}
+              <Route path="announcements" element={<AnnouncementManagement />} />
+              
+              {/* Catch all route */}
+              <Route path="*" element={<Navigate to="/dashboard" replace />} />
+            </Route>
+          </Routes>
+        </div>
+      </Router>
+    </AuthProvider>
   );
 }
 
